@@ -1,6 +1,6 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
-/* Tokens del sistema de diseÃ±o (Prototipo/DESIGN.md) */
+/* Tokens del sistema de diseño (Prototipo/DESIGN.md) */
 @theme {
   --color-on-surface-variant: #c4c5da;
   --color-secondary-fixed-dim: #cbbeff;
