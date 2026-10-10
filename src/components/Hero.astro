@@ -1,139 +1,138 @@
 ---
-import { profile } from '../data/projects';
-
 const base = import.meta.env.BASE_URL;
+
+const links = {
+  linkedin: 'https://linkedin.com/in/jaredelgado',
+  github: 'https://github.com/Jarben-Singh',
+  cv: `${base}cv.pdf`,
+};
+
+// 8-bit icons: '#' = filled pixel, '.' = empty
+const icons = {
+  linkedin: [
+    '##########',
+    '##.#######',
+    '##########',
+    '##.#....##',
+    '##.#.##.##',
+    '##.#.##.##',
+    '##.#.##.##',
+    '##.#.##.##',
+    '##########',
+    '##########',
+  ],
+  github: [
+    '.#........#.',
+    '.##########.',
+    '############',
+    '##.######.##',
+    '############',
+    '############',
+    '.##########.',
+    '..########..',
+    '...######...',
+    '...##..##...',
+  ],
+  download: [
+    '....##....',
+    '....##....',
+    '....##....',
+    '....##....',
+    '..######..',
+    '...####...',
+    '....##....',
+    '..........',
+    '##########',
+    '##########',
+  ],
+};
+
+const pixels = (rows: string[]) =>
+  rows.flatMap((row, y) =>
+    [...row].flatMap((c, x) => (c === '#' ? [{ x, y }] : [])),
+  );
 ---
 
-<section id="about" class="w-full relative">
-  <div
-    class="w-full bg-gradient-to-br from-tertiary-fixed via-secondary to-primary border-4 border-[#0600AB] shadow-[6px_6px_0px_0px_#01043e] p-4 sm:p-6 md:p-8 relative"
-  >
-    <div
-      class="flex items-center justify-between border-b-4 border-[#0600AB] pb-3 mb-6 bg-surface-container-lowest/15 px-3 py-1"
-    >
-      <div class="flex items-center gap-2">
-        <span class="inline-block w-3 h-3 bg-tertiary-fixed border border-[#0600AB]"></span>
-        <span
-          class="font-pixel text-[9px] md:text-[10px] text-surface-container-lowest tracking-widest font-bold"
-          >CARTRIDGE #01 :: SYSTEM LOADED</span
-        >
-      </div>
-      <div
-        class="flex items-center gap-1.5 font-label-sm text-label-sm text-surface-container-lowest font-bold"
-      >
-        <span>MEM: 64KB</span>
-        <span class="inline-block w-2 h-2 bg-secondary-container"></span>
-        <span>NTSC-U</span>
+<section id="about" class="w-full relative pt-6 md:pt-10 pb-4">
+  <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-8 md:gap-12 items-center">
+    <!-- Avatar -->
+    <div class="flex justify-center md:justify-start">
+      <div class="p-2 bg-[#0600AB] w-fit">
+        <div class="p-2 bg-gradient-to-b from-[#ffd7f3] via-[#cbbeff] to-[#4d2eb0]">
+          <div
+            class="relative w-48 h-48 sm:w-56 sm:h-56 bg-surface-container-lowest border-4 border-[#0600AB] overflow-hidden"
+          >
+            <img
+              alt="Pixel art avatar of Jared Delgado"
+              class="w-full h-full object-cover [image-rendering:pixelated]"
+              src={`${base}img/avatar.png`}
+            />
+            <div class="absolute top-1 left-1 w-2 h-2 bg-white"></div>
+            <div class="absolute top-1 right-1 w-2 h-2 bg-white"></div>
+            <div class="absolute bottom-1 left-1 w-2 h-2 bg-white"></div>
+            <div class="absolute bottom-1 right-1 w-2 h-2 bg-white"></div>
+          </div>
+        </div>
+        <div class="flex justify-between items-center mt-2">
+          <span
+            class="font-pixel text-[8px] bg-surface-container-lowest text-primary-fixed px-2 py-1 border border-primary-container"
+            >PLAYER 1</span
+          >
+          <span class="font-pixel text-[8px] bg-[#1f41ff] text-white px-2 py-1">LVL 19</span>
+        </div>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-      <!-- Avatar -->
-      <div class="md:col-span-5 flex flex-col items-center">
-        <div class="relative p-2 bg-[#0600AB] shadow-[4px_4px_0px_0px_#01043e]">
-          <div
-            class="p-2 bg-gradient-to-b from-[#ffd7f3] via-[#cbbeff] to-[#4d2eb0] border-2 border-surface-container-lowest"
-          >
-            <div
-              class="relative w-48 h-48 sm:w-56 sm:h-56 bg-surface-container-lowest border-4 border-[#0600AB] overflow-hidden flex items-center justify-center"
-            >
-              <img
-                alt="Pixel art avatar of Jared Delgado"
-                class="w-full h-full object-cover [image-rendering:pixelated]"
-                src={`${base}img/avatar.jpg`}
-              />
-              <div class="absolute top-1 left-1 w-2 h-2 bg-tertiary-fixed"></div>
-              <div class="absolute top-1 right-1 w-2 h-2 bg-tertiary-fixed"></div>
-              <div class="absolute bottom-1 left-1 w-2 h-2 bg-tertiary-fixed"></div>
-              <div class="absolute bottom-1 right-1 w-2 h-2 bg-tertiary-fixed"></div>
-            </div>
-          </div>
-          <div class="flex justify-between items-center mt-2 px-1">
-            <span
-              class="font-pixel text-[9px] bg-surface-container-lowest text-tertiary-fixed px-2 py-0.5 border border-primary-container"
-              >PLAYER 1</span
-            >
-            <span
-              class="font-pixel text-[9px] bg-primary-container text-tertiary-fixed px-2 py-0.5 border border-surface-container-lowest"
-              >LVL 24</span
-            >
-          </div>
-        </div>
-        <div class="w-full max-w-[240px] mt-3 space-y-1 font-label-sm text-label-sm">
-          <div
-            class="flex items-center justify-between text-surface-container-lowest font-bold text-[10px]"
-          >
-            <span>HP [CODE]</span>
-            <span>999/999</span>
-          </div>
-          <div class="w-full h-2.5 bg-surface-container-lowest p-0.5 border border-[#0600AB]">
-            <div class="w-full h-full bg-[#1f41ff]"></div>
-          </div>
-        </div>
+    <!-- Bio -->
+    <div class="flex flex-col gap-4 min-w-0">
+      <div>
+        <h1
+          class="font-pixel text-2xl sm:text-3xl md:text-4xl text-white leading-tight tracking-wider"
+        >
+          JARED DELGADO
+        </h1>
+        <p class="font-pixel text-[11px] sm:text-xs text-[#ffd7f3] tracking-widest mt-2">
+          FULL STACK DEVELOPER
+        </p>
       </div>
 
-      <!-- Bio -->
-      <div class="md:col-span-7 flex flex-col gap-4">
-        <div>
-          <div class="flex flex-wrap items-center gap-2 mb-2">
-            <span
-              class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-surface-container-lowest text-primary font-pixel text-[8px] md:text-[9px] border border-primary-container"
-            >
-              <span class="w-2 h-2 bg-emerald-400 inline-block shadow-[0_0_4px_#34d399] animate-pulse"
-              ></span>
-              OPEN TO INTERNSHIPS
-            </span>
-            <span class="font-pixel text-[8px] text-surface-container-lowest/80"
-              >CLASS: FULL-STACK ARCHITECT</span
-            >
-          </div>
-          <h1
-            class="font-pixel text-lg sm:text-xl md:text-2xl text-surface-container-lowest leading-tight tracking-wider"
-          >
-            {profile.name}
-          </h1>
-          <p class="font-headline-sm text-headline-sm text-surface-container-highest font-bold mt-1">
-            {profile.role}
-          </p>
-          <p
-            class="font-body-sm text-body-sm text-surface-container-lowest/90 font-medium mt-1"
-          >
-            {profile.school}
-          </p>
-        </div>
+      <p class="font-body-md text-body-md text-[#f1eaff] leading-snug max-w-md">
+        Software Engineering student focused on process optimization and driven by curiosity for
+        low-level systems, from web apps to SNES-era hardware.
+      </p>
 
-        <div
-          class="relative bg-surface-container-lowest border-4 border-[#dfe0ff] shadow-[4px_4px_0px_0px_#0600AB] p-3.5 sm:p-4 text-on-surface"
-        >
-          <div class="absolute -top-1 -left-1 w-2 h-2 bg-[#dfe0ff]"></div>
-          <div class="absolute -top-1 -right-1 w-2 h-2 bg-[#dfe0ff]"></div>
-          <div class="absolute -bottom-1 -left-1 w-2 h-2 bg-[#dfe0ff]"></div>
-          <div class="absolute -bottom-1 -right-1 w-2 h-2 bg-[#dfe0ff]"></div>
-          <div class="flex items-start gap-2">
-            <span class="text-tertiary font-pixel text-xs leading-none select-none">▶</span>
-            <p class="font-body-md text-body-md text-[#dfe0ff] leading-relaxed">{profile.quote}</p>
-          </div>
-          <div class="flex justify-end mt-1">
-            <span class="font-pixel text-[8px] text-tertiary animate-bounce">▼</span>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-3 pt-2">
-          <a
-            class="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-tertiary-fixed via-secondary to-primary-container text-surface-container-lowest font-pixel text-[10px] md:text-[11px] border-4 border-surface-container-lowest shadow-[4px_4px_0px_0px_#0600AB] hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none transition-transform uppercase tracking-wider font-bold"
-            href="#project-grid"
-          >
-            <span class="material-symbols-outlined text-[16px] leading-none">sports_esports</span>
-            VIEW PROJECTS
-          </a>
-          <a
-            class="inline-flex items-center gap-2 px-4 py-3 bg-surface-container-lowest/10 text-surface-container-lowest font-pixel text-[10px] md:text-[11px] border-[3px] border-surface-container-lowest hover:bg-surface-container-lowest hover:text-tertiary-fixed transition-colors active:translate-x-0.5 active:translate-y-0.5 uppercase tracking-wider"
-            href={`mailto:${profile.email}`}
-          >
-            <span class="material-symbols-outlined text-[16px] leading-none">download</span>
-            DOWNLOAD CV
-          </a>
-        </div>
+      <div class="flex flex-wrap items-center gap-3 pt-3">
+        {
+          [
+            { label: 'LINKEDIN', href: links.linkedin, icon: 'linkedin', ext: true },
+            { label: 'GITHUB', href: links.github, icon: 'github', ext: true },
+            { label: 'DOWNLOAD CV', href: links.cv, icon: 'download', ext: false },
+          ].map((b) => {
+            const rows = icons[b.icon as keyof typeof icons];
+            return (
+              <a
+                class="inline-flex items-center gap-2.5 px-3 py-2 text-white font-label-md text-[11px] tracking-wider uppercase border border-[#dfe0ff] hover:bg-white hover:text-surface-container-lowest transition-colors"
+                href={b.href}
+                target={b.ext ? '_blank' : undefined}
+                rel={b.ext ? 'noopener noreferrer' : undefined}
+                download={b.ext ? undefined : ''}
+              >
+                <svg
+                  class="w-3.5 h-3.5 shrink-0"
+                  viewBox={`0 0 ${rows[0].length} ${rows.length}`}
+                  shape-rendering="crispEdges"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  {pixels(rows).map((p) => (
+                    <rect x={p.x} y={p.y} width="1" height="1" />
+                  ))}
+                </svg>
+                {b.label}
+              </a>
+            );
+          })
+        }
       </div>
     </div>
   </div>
