@@ -1,6 +1,6 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
-/* Tokens del sistema de diseño (Prototipo/DESIGN.md) */
+/* Tokens del sistema de diseÃ±o (Prototipo/DESIGN.md) */
 @theme {
   --color-on-surface-variant: #c4c5da;
   --color-secondary-fixed-dim: #cbbeff;
@@ -139,7 +139,7 @@
     scroll-padding-top: 6rem;
   }
   body {
-    overscroll-behavior: none;
+    overflow-x: clip;
   }
 }
 
