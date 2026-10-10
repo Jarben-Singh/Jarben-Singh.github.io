@@ -1,0 +1,69 @@
+---
+import { profile } from '../data/projects';
+---
+
+<footer
+  id="contact"
+  class="w-full relative z-20 bg-gradient-to-b from-surface-container-low via-surface-container-lowest to-surface-container-lowest mt-space-xl"
+>
+  <div class="w-full h-2 bg-primary-container flex">
+    <div class="w-1/4 h-full bg-primary-container"></div>
+    <div class="w-1/4 h-full bg-secondary-container"></div>
+    <div class="w-1/4 h-full bg-surface-container-high"></div>
+    <div class="w-1/4 h-full bg-primary-container"></div>
+  </div>
+  <div class="max-w-[960px] mx-auto px-margin-mobile md:px-gutter py-space-xl">
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 gap-space-lg border-4 border-outline-variant bg-surface-container p-space-lg shadow-[4px_4px_0_#01043e]"
+    >
+      <div class="flex flex-col gap-space-sm">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 bg-tertiary inline-block"></span>
+          <span class="font-pixel text-[12px] text-primary-fixed">{profile.name}</span>
+        </div>
+        <p class="font-label-md text-label-md text-secondary uppercase tracking-widest">
+          {profile.role}
+        </p>
+        <p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-2">
+          <span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
+          {profile.location}
+        </p>
+      </div>
+      <div class="flex flex-col gap-space-xs font-label-md text-label-md justify-center md:items-end">
+        <a
+          class="text-on-surface-variant hover:text-tertiary flex items-center gap-2 transition-colors"
+          href={`mailto:${profile.email}`}
+        >
+          <span class="material-symbols-outlined text-[16px]">mail</span>{profile.email}
+        </a>
+        <a
+          class="text-on-surface-variant hover:text-tertiary flex items-center gap-2 transition-colors"
+          href={profile.github}
+          rel="noreferrer"
+          target="_blank"
+        >
+          <span class="material-symbols-outlined text-[16px]">code</span>{profile.githubLabel}
+        </a>
+        <a
+          class="text-on-surface-variant hover:text-tertiary flex items-center gap-2 transition-colors"
+          href={profile.linkedin}
+          rel="noreferrer"
+          target="_blank"
+        >
+          <span class="material-symbols-outlined text-[16px]">badge</span>{profile.linkedinLabel}
+        </a>
+      </div>
+    </div>
+    <div
+      class="mt-space-lg pt-space-md border-t-2 border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-space-sm font-label-sm text-label-sm text-on-surface-variant"
+    >
+      <div class="flex items-center gap-2">
+        <span class="font-pixel text-[10px]">© 2026 — Thanks for playing</span>
+        <span class="material-symbols-outlined text-[14px] text-error">favorite</span>
+      </div>
+      <div class="font-pixel text-[9px] text-secondary flex items-center gap-2">
+        <span>STAGE COMPLETE</span><span class="pixel-blink">▋</span>
+      </div>
+    </div>
+  </div>
+</footer>

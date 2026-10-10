@@ -1,0 +1,74 @@
+---
+import { profile } from '../data/projects';
+
+const base = import.meta.env.BASE_URL;
+const links = [
+  { label: 'PROJECTS', href: '#project-grid', active: true },
+  { label: 'ABOUT', href: '#about', active: false },
+  { label: 'CONTACT', href: '#contact', active: false },
+];
+---
+
+<header
+  class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary-container via-surface-container to-surface-container-lowest border-b-4 border-primary-container pixel-border-4"
+>
+  <div
+    class="h-20 max-w-[960px] mx-auto px-margin-mobile md:px-gutter flex items-center justify-between gap-space-sm"
+  >
+    <div class="flex items-center gap-3 shrink-0">
+      <img alt="JD Retro Pixel Logo" class="h-8 w-auto object-contain" src={`${base}img/logo.png`} />
+      <a
+        class="font-pixel text-[11px] md:text-[13px] tracking-wider text-primary-fixed hover:text-tertiary transition-colors uppercase"
+        href="#"
+      >
+        {profile.name}
+      </a>
+    </div>
+
+    <nav class="hidden md:flex items-center gap-6 lg:gap-8 font-label-md text-label-md">
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            class:list={[
+              'transition-colors py-1',
+              link.active
+                ? "text-tertiary-fixed border-b-2 border-tertiary font-bold relative before:content-['▶'] before:mr-1 before:text-[10px] before:text-tertiary"
+                : 'text-on-surface-variant hover:text-on-surface',
+            ]}
+            aria-current={link.active ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="flex items-center gap-3 shrink-0">
+      <div
+        class="hidden sm:flex items-center gap-2 px-2 py-1 bg-surface-container-lowest border-2 border-outline-variant"
+      >
+        <span class="material-symbols-outlined text-[16px] text-secondary">volume_up</span>
+        <div class="flex gap-0.5">
+          <div class="w-1.5 h-3 bg-secondary"></div>
+          <div class="w-1.5 h-3 bg-secondary"></div>
+          <div class="w-1.5 h-3 bg-secondary"></div>
+          <div class="w-1.5 h-3 bg-outline-variant"></div>
+        </div>
+      </div>
+      <div class="flex border-2 border-outline-variant bg-surface-container-lowest">
+        <button
+          class="px-2 py-1 font-pixel text-[9px] bg-primary-container text-tertiary-fixed border-r border-outline-variant"
+          type="button">EN</button
+        >
+        <button
+          class="px-2 py-1 font-pixel text-[9px] text-on-surface-variant hover:text-on-surface"
+          type="button">ES</button
+        >
+      </div>
+      <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+      </div>
+    </div>
+  </div>
+</header>

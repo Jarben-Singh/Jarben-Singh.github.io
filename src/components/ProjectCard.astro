@@ -1,0 +1,121 @@
+---
+import type { Project } from '../data/projects';
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const { variant } = project;
+
+const styles = {
+  featured: {
+    article:
+      'group relative bg-gradient-to-b from-secondary-container via-primary-container to-[#0600AB] border-4 border-tertiary-fixed shadow-[6px_6px_0px_0px_#01043e] -translate-y-1 transition-transform',
+    header: 'bg-tertiary-fixed border-surface-container-lowest',
+    slot: 'text-surface-container-lowest font-bold',
+    cover: 'bg-surface-container-lowest/80 border-primary-container',
+    title: 'text-tertiary-fixed',
+    desc: 'text-[#F2E6EE]',
+    tag: 'text-secondary-fixed border-secondary',
+    cta: 'bg-tertiary-fixed text-surface-container-lowest border-surface-container-lowest hover:bg-secondary',
+  },
+  default: {
+    article:
+      'group bg-gradient-to-b from-secondary-container via-primary-container to-[#0600AB] border-4 border-primary-container shadow-[4px_4px_0px_0px_#01043e] hover:border-tertiary-fixed hover:-translate-y-0.5 transition-all',
+    header: 'bg-surface-container-lowest border-primary-container',
+    slot: 'text-primary-fixed',
+    cover: 'bg-surface-container-lowest/80 border-primary-container',
+    title: 'text-primary-fixed',
+    desc: 'text-[#F2E6EE]',
+    tag: 'text-primary-fixed border-primary-container',
+    cta: 'bg-surface-container-lowest text-primary-fixed border-primary-container hover:bg-primary-container hover:text-tertiary-fixed',
+  },
+  locked: {
+    article:
+      'relative bg-surface-container-low border-4 border-outline-variant shadow-[4px_4px_0px_0px_#01043e] opacity-85',
+    header: 'bg-surface-container-lowest border-outline-variant',
+    slot: 'text-outline',
+    cover: 'bg-surface-container-lowest/90 border-outline-variant',
+    title: 'text-outline',
+    desc: 'text-on-surface-variant/70',
+    tag: 'text-outline border-outline-variant',
+    cta: '',
+  },
+}[variant];
+
+const badgeClass =
+  variant === 'locked'
+    ? 'bg-surface-container-lowest text-outline border border-outline'
+    : project.badgeClass;
+---
+
+<article class:list={[styles.article, 'flex flex-col justify-between']}>
+  <div>
+    <div class:list={['px-3 py-2 flex items-center justify-between border-b-4', styles.header]}>
+      <div class:list={['flex items-center gap-1.5 font-pixel text-[9px]', styles.slot]}>
+        {variant === 'featured' && <span class="animate-ping text-primary-container">▶</span>}
+        {
+          variant === 'locked' && (
+            <span class="material-symbols-outlined text-[12px] leading-none">lock</span>
+          )
+        }
+        <span>SLOT {project.slot} // {variant === 'featured' ? 'ACTIVE MISSION' : project.label}</span>
+      </div>
+      <span class:list={['font-pixel text-[8px] px-1.5 py-0.5', badgeClass]}>{project.badge}</span>
+    </div>
+
+    <div class:list={['p-4 border-b-4 relative overflow-hidden', styles.cover]}>
+      <slot name="cover" />
+    </div>
+
+    <div class="p-4 sm:p-5">
+      <h3 class:list={['font-headline-md text-headline-md font-bold tracking-tight mb-1.5', styles.title]}>
+        {project.title}
+      </h3>
+      <p class:list={['font-body-md text-body-md leading-relaxed mb-4', styles.desc]}>
+        {project.description}
+      </p>
+      <div class="flex flex-wrap gap-2 mb-4">
+        {
+          project.tags.map((tag) => (
+            <span
+              class:list={[
+                'font-label-sm text-label-sm px-2 py-1 bg-surface-container-lowest border',
+                styles.tag,
+              ]}
+            >
+              [{tag}]
+            </span>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="p-4 pt-0">
+    {
+      variant === 'locked' ? (
+        <button
+          class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-surface-container-lowest text-outline font-pixel text-[10px] border-2 border-outline-variant cursor-not-allowed"
+          disabled
+          type="button"
+        >
+          <span class="material-symbols-outlined text-[14px]">lock</span>
+          <span>{project.cta}</span>
+        </button>
+      ) : (
+        <a
+          class:list={[
+            'w-full flex items-center justify-between px-3 py-2 font-pixel text-[10px] border-2 transition-colors',
+            styles.cta,
+          ]}
+          href={project.href}
+        >
+          <span>{project.cta}</span>
+          <span>▶</span>
+        </a>
+      )
+    }
+  </div>
+</article>
