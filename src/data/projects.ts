@@ -1,96 +1,74 @@
-export type ProjectVariant = 'featured' | 'default' | 'locked';
-
 export interface Project {
-  slot: string;
-  label: string;
-  badge: string;
-  badgeClass: string;
   title: string;
-  description: string;
-  tags: string[];
-  cta: string;
-  href: string;
-  variant: ProjectVariant;
+  /** Ruta dentro de /public. Si falta, se dibuja un cartucho genérico. */
+  cartridge?: string;
+  features: string[];
+  href?: string;
+  locked?: boolean;
 }
 
 export const projects: Project[] = [
   {
-    slot: '01',
-    label: 'ACTIVE MISSION',
-    badge: 'VER 1.2',
-    badgeClass: 'bg-primary-container text-tertiary-fixed',
-    title: 'focus-focus',
-    description:
-      'Gamified productivity mobile app building deep focus habits through quests, RPG progression, and unlockable gems.',
-    tags: ['React Native', 'Expo'],
-    cta: 'OPEN QUEST LOG',
+    title: 'Focus Focus',
+    cartridge: 'img/cartridge-focus.png',
+    features: [
+      'Mobile App with React Native',
+      'Tool against procrastination',
+      'Gamification system',
+      'Widgets and native features',
+    ],
     href: '#',
-    variant: 'featured',
   },
   {
-    slot: '02',
-    label: 'CARTRIDGE',
-    badge: 'ASM',
-    badgeClass: 'bg-secondary-container text-secondary',
     title: 'SNES Tetris',
-    description:
-      'A Tetris clone engineered from scratch for the Super Nintendo Entertainment System, written directly in assembly.',
-    tags: ['65816 Assembly', 'WLA-DX'],
-    cta: 'VIEW ROM SOURCE',
+    cartridge: 'img/cartridge-tetris.png',
+    features: [
+      'Written from scratch in 65816 Assembly',
+      'Runs on real Super Nintendo hardware',
+      'Built with the WLA-DX toolchain',
+      'Custom graphics and sound routines',
+    ],
     href: '#',
-    variant: 'default',
   },
   {
-    slot: '03',
-    label: 'ENTERPRISE',
-    badge: 'FULL-STACK',
-    badgeClass: 'bg-surface-container-high text-on-surface-variant',
     title: 'Land Sales System',
-    description:
-      'Sales and lot inventory management system engineered for a family land development business (Rancho Delgado).',
-    tags: ['React', 'Spring Boot', 'MySQL'],
-    cta: 'VIEW SYSTEM ARCHITECTURE',
+    features: [
+      'Full-stack web application',
+      'Lot inventory and sales tracking',
+      'React + Spring Boot + MySQL',
+      'Built for Rancho Delgado',
+    ],
     href: '#',
-    variant: 'default',
   },
   {
-    slot: '04',
-    label: 'CIVIC TECH',
-    badge: 'WEB APP',
-    badgeClass: 'bg-surface-container-high text-on-surface-variant',
     title: 'EDSAGUA / CESPE',
-    description:
-      'Citizen water-service reporting and infrastructure incident telemetry web application for municipal utilities.',
-    tags: ['Spring Boot', 'JavaScript'],
-    cta: 'VIEW REPORTING ENGINE',
+    features: [
+      'Citizen water-service reporting',
+      'Infrastructure incident telemetry',
+      'Spring Boot + JavaScript',
+      'Made for municipal utilities',
+    ],
     href: '#',
-    variant: 'default',
   },
   {
-    slot: '05',
-    label: 'NETPLAY GAME',
-    badge: 'NETCODE',
-    badgeClass: 'bg-secondary-container text-secondary',
     title: 'Rollback Fighter',
-    description:
-      'Minimal two-cube fighting game featuring custom deterministic UDP rollback netcode and frame prediction.',
-    tags: ['C++', 'UDP'],
-    cta: 'VIEW NETPLAY SOURCE',
+    features: [
+      'Two-cube fighting game in C++',
+      'Deterministic UDP rollback netcode',
+      'Frame prediction and re-simulation',
+      'Online play with minimal latency',
+    ],
     href: '#',
-    variant: 'default',
   },
   {
-    slot: '06',
-    label: 'CLASSIFIED',
-    badge: 'LOCKED',
-    badgeClass: '',
-    title: 'PROJECT CLASSIFIED',
-    description:
-      'A sixth classified game / systems project currently compiling in local development. Stay tuned for Stage 02.',
-    tags: ['LOCKED', 'STAGE 02'],
-    cta: 'RESTRICTED ACCESS',
-    href: '',
-    variant: 'locked',
+    title: 'Classified',
+    features: [
+      'A new game / systems project',
+      'Currently compiling in local dev',
+      'Details are locked for now',
+      'Stay tuned for Stage 02',
+    ],
+    locked: true,
   },
 ];
 

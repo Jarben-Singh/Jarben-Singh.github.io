@@ -1,4 +1,6 @@
 ---
+import { pixelIcons as icons } from '../data/pixelIcons';
+
 const base = import.meta.env.BASE_URL;
 
 const links = {
@@ -7,49 +9,10 @@ const links = {
   cv: `${base}cv.pdf`,
 };
 
-// 8-bit icons: '#' = filled pixel, '.' = empty
-const icons = {
-  linkedin: [
-    '##########',
-    '##.#######',
-    '##########',
-    '##.#....##',
-    '##.#.##.##',
-    '##.#.##.##',
-    '##.#.##.##',
-    '##.#.##.##',
-    '##########',
-    '##########',
-  ],
-  github: [
-    '.#........#.',
-    '.##########.',
-    '############',
-    '##.######.##',
-    '############',
-    '############',
-    '.##########.',
-    '..########..',
-    '...######...',
-    '...##..##...',
-  ],
-  download: [
-    '....##....',
-    '....##....',
-    '....##....',
-    '....##....',
-    '..######..',
-    '...####...',
-    '....##....',
-    '..........',
-    '##########',
-    '##########',
-  ],
-};
-
+// Merge horizontal runs of filled pixels into single rects
 const pixels = (rows: string[]) =>
   rows.flatMap((row, y) =>
-    [...row].flatMap((c, x) => (c === '#' ? [{ x, y }] : [])),
+    [...row.matchAll(/#+/g)].map((m) => ({ x: m.index!, y, w: m[0].length })),
   );
 ---
 
@@ -60,13 +23,21 @@ const pixels = (rows: string[]) =>
       <div class="p-2 bg-[#0600AB] w-fit">
         <div class="p-2 bg-gradient-to-b from-[#ffd7f3] via-[#cbbeff] to-[#4d2eb0]">
           <div
-            class="relative w-48 h-48 sm:w-56 sm:h-56 bg-surface-container-lowest border-4 border-[#0600AB] overflow-hidden"
+            class="avatar-swap relative w-48 h-48 sm:w-56 sm:h-56 bg-surface-container-lowest border-4 border-[#0600AB] overflow-hidden"
+            tabindex="0"
           >
             <img
               alt="Pixel art avatar of Jared Delgado"
               class="w-full h-full object-cover [image-rendering:pixelated]"
               src={`${base}img/avatar-v3.png`}
             />
+            <canvas
+              class="avatar-canvas absolute inset-0 w-full h-full"
+              width="256"
+              height="256"
+              data-src={`${base}img/Jared-photo.jpeg`}
+              role="img"
+              aria-label="Photo of Jared Delgado"></canvas>
             <div class="absolute top-1 left-1 w-2 h-2 bg-white"></div>
             <div class="absolute top-1 right-1 w-2 h-2 bg-white"></div>
             <div class="absolute bottom-1 left-1 w-2 h-2 bg-white"></div>
@@ -111,21 +82,21 @@ const pixels = (rows: string[]) =>
             const rows = icons[b.icon as keyof typeof icons];
             return (
               <a
-                class="inline-flex items-center gap-2.5 px-3 py-2 text-white font-label-md text-[11px] tracking-wider uppercase border border-[#dfe0ff] hover:bg-white hover:text-surface-container-lowest transition-colors"
+                class="inline-flex items-center gap-2.5 px-3 py-1.5 text-white font-label-md text-[11px] tracking-wider uppercase border border-[#dfe0ff] hover:bg-white hover:text-surface-container-lowest transition-colors"
                 href={b.href}
                 target={b.ext ? '_blank' : undefined}
                 rel={b.ext ? 'noopener noreferrer' : undefined}
                 download={b.ext ? undefined : ''}
               >
                 <svg
-                  class="w-3.5 h-3.5 shrink-0"
+                  class="w-6 h-6 shrink-0"
                   viewBox={`0 0 ${rows[0].length} ${rows.length}`}
                   shape-rendering="crispEdges"
                   fill="currentColor"
                   aria-hidden="true"
                 >
                   {pixels(rows).map((p) => (
-                    <rect x={p.x} y={p.y} width="1" height="1" />
+                    <rect x={p.x} y={p.y} width={p.w} height="1" />
                   ))}
                 </svg>
                 {b.label}
@@ -137,3 +108,82 @@ const pixels = (rows: string[]) =>
     </div>
   </div>
 </section>
+
+<script>
+  const GRID = 16;
+  const SIZE = 256;
+  const DURATION = 550;
+
+  const box = document.querySelector<HTMLElement>('.avatar-swap');
+  const canvas = box?.querySelector<HTMLCanvasElement>('.avatar-canvas');
+  const ctx = canvas?.getContext('2d');
+
+  if (box && canvas && ctx) {
+    const cell = SIZE / GRID;
+    // Random reveal rank for each cell
+    const rank = Array.from({ length: GRID * GRID }, (_, i) => i).sort(() => Math.random() - 0.5);
+    const order = new Array<number>(rank.length);
+    rank.forEach((cellIndex, r) => (order[cellIndex] = r));
+
+    const photo = document.createElement('canvas');
+    photo.width = photo.height = SIZE;
+    let ready = false;
+    let progress = 0;
+    let target = 0;
+    let last = 0;
+    let raf = 0;
+
+    const img = new Image();
+    img.onload = () => {
+      const p = photo.getContext('2d')!;
+      // Zoomed square crop centered on the face
+      const side = 880;
+      const sx = img.width / 2 - side / 2;
+      const sy = Math.min(img.height - side, Math.max(0, img.height * 0.5 - side / 2 + 160));
+      p.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
+      ready = true;
+      draw();
+    };
+    img.src = canvas.dataset.src!;
+
+    const draw = () => {
+      ctx.clearRect(0, 0, SIZE, SIZE);
+      if (!ready) return;
+      const shown = progress * order.length;
+      for (let i = 0; i < order.length; i++) {
+        if (order[i] < shown) {
+          const x = (i % GRID) * cell;
+          const y = Math.floor(i / GRID) * cell;
+          ctx.drawImage(photo, x, y, cell, cell, x, y, cell, cell);
+        }
+      }
+    };
+
+    const tick = (now: number) => {
+      const dt = now - last;
+      last = now;
+      const step = dt / DURATION;
+      progress = target > progress ? Math.min(target, progress + step) : Math.max(target, progress - step);
+      draw();
+      raf = progress === target ? 0 : requestAnimationFrame(tick);
+    };
+
+    const go = (to: number) => {
+      target = to;
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        progress = to;
+        draw();
+        return;
+      }
+      if (!raf) {
+        last = performance.now();
+        raf = requestAnimationFrame(tick);
+      }
+    };
+
+    box.addEventListener('pointerenter', () => go(1));
+    box.addEventListener('pointerleave', () => go(0));
+    box.addEventListener('focus', () => go(1));
+    box.addEventListener('blur', () => go(0));
+  }
+</script>

@@ -1,0 +1,110 @@
+---
+import { projects } from '../data/projects';
+
+const base = import.meta.env.BASE_URL;
+
+// Estrella pixel-art 7x7
+const star = [
+  '...#...',
+  '...#...',
+  '#######',
+  '.#####.',
+  '..###..',
+  '.##.##.',
+  '.#...#.',
+];
+const starRects = star.flatMap((row, y) =>
+  [...row.matchAll(/#+/g)].map((m) => ({ x: m.index!, y, w: m[0].length })),
+);
+---
+
+<section id="project-grid" class="w-full mt-12">
+  <!-- Header -->
+  <div
+    class="bg-surface-container border-4 border-outline-variant shadow-[4px_4px_0px_0px_#01043e] p-4 flex items-center gap-3"
+  >
+    <div
+      class="w-7 h-7 bg-tertiary border-2 border-surface-container-lowest flex items-center justify-center shrink-0 shadow-[2px_2px_0_#01043e]"
+    >
+      <span class="font-pixel text-[10px] text-surface-container-lowest font-bold animate-pulse"
+        >$</span
+      >
+    </div>
+    <h2 class="font-pixel text-sm sm:text-base text-primary-fixed tracking-wide">
+      SELECT A PROJECT
+    </h2>
+  </div>
+
+  <ul class="flex flex-col mt-10">
+    {
+      projects.map((project, i) => (
+        <li
+          class:list={[
+            'grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-6 items-center py-10',
+            i > 0 && 'border-t-4 border-dashed border-outline-variant/40',
+          ]}
+        >
+          <!-- Cartucho -->
+          <div class="flex justify-center">
+            {project.cartridge ? (
+              <img
+                src={`${base}${project.cartridge}`}
+                alt={`${project.title} cartridge`}
+                class="w-full max-w-[340px] h-auto block [image-rendering:pixelated]"
+                draggable="false"
+              />
+            ) : (
+              <div class="relative w-full max-w-[340px] aspect-[340/199] bg-[#7f7f7f] border-x-[6px] border-[#5a5a5a] [image-rendering:pixelated]">
+                <div class="absolute inset-x-[18%] top-[6%] h-[44%] bg-[#0033ff] border-4 border-[#5a5a5a] flex items-center justify-center text-center p-1">
+                  <span class="font-pixel text-[10px] sm:text-xs text-white leading-tight uppercase">
+                    {project.title}
+                  </span>
+                </div>
+                <div class="absolute inset-x-[7%] top-[60%] h-[12%] bg-[#5a5a5a]" />
+                <div class="absolute inset-x-[38%] top-[64%] h-[3%] bg-[#333]" />
+              </div>
+            )}
+          </div>
+
+          <!-- Detalles -->
+          <div class="text-center md:text-left md:pl-6">
+            <h3 class="font-pixel text-xl sm:text-2xl text-white tracking-wide mb-8">
+              {project.title}
+            </h3>
+            <ul class="inline-flex flex-col gap-4 text-left mb-10">
+              {project.features.map((feature) => (
+                <li class="flex items-center gap-3 font-body-md text-body-md text-on-surface">
+                  <svg
+                    viewBox="0 0 7 7"
+                    class="w-5 h-5 shrink-0 text-[#ffd23f]"
+                    shape-rendering="crispEdges"
+                    aria-hidden="true"
+                  >
+                    {starRects.map((r) => (
+                      <rect x={r.x} y={r.y} width={r.w} height="1" fill="currentColor" />
+                    ))}
+                  </svg>
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <div>
+              {project.locked ? (
+                <span class="inline-block px-8 py-2 border-2 border-outline-variant font-pixel text-[10px] text-outline cursor-not-allowed">
+                  LOCKED
+                </span>
+              ) : (
+                <a
+                  href={project.href}
+                  class="inline-block px-8 py-2 border-2 border-primary-fixed-dim bg-surface-container-lowest font-pixel text-[10px] text-white hover:bg-primary-container transition-colors"
+                >
+                  MORE DETAILS
+                </a>
+              )}
+            </div>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</section>
