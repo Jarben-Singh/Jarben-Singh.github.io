@@ -94,16 +94,18 @@ const initial = Math.max(
               ▶
             </span>
             {p.cartridge ? (
-              <span class="art">
-                <img
-                  src={`${base}${p.cartridge.src}`}
-                  alt={p.title}
-                  draggable="false"
-                  style={`width: calc(100% * ${p.cartridge.width} / ${p.cartridge.visibleWidth}); margin-top: calc(-100% * ${p.cartridge.trimTop} / ${p.cartridge.visibleWidth})`}
-                />
-              </span>
+              <img
+                class="art"
+                src={`${base}${p.cartridge}`}
+                alt={p.title}
+                width="128"
+                height="80"
+                draggable="false"
+              />
             ) : (
               <>
+                <span class="shell" aria-hidden="true" />
+                <span class="face" aria-hidden="true" />
                 <span class="lbl">
                   <b>{p.title}</b>
                 </span>
@@ -193,10 +195,12 @@ const initial = Math.max(
 
 <style>
   #project-grid {
-    /* Grises del cartucho: los mismos del arte PNG */
-    --shell: #7f7f7f;
-    --shell-lo: #5a5a5a;
-    --shell-edge: #2f2e2d;
+    /* Grises del cartucho: la paleta del arte de 128×80 (cartridge-focus.png) */
+    --shell: #a0a0a3;
+    --shell-hi: #cfcfcf;
+    --shell-lo: #777777;
+    --shell-edge: #4b4b4b;
+    --shell-outline: #ffffff;
     --star: #ffd23f;
     --shadow: var(--color-surface-container-lowest);
   }
@@ -253,19 +257,21 @@ const initial = Math.max(
     box-shadow: 4px 4px 0 0 var(--shadow);
   }
 
+  /* Proporción de un cartucho real (135×85 mm ≈ 8:5). El arte se dibuja a
+     128×80 px y se muestra a 1x; solo en pantallas muy angostas se reduce. */
   .cart {
     position: relative;
     display: block;
-    width: 100%;
-    aspect-ratio: 2 / 1;
+    justify-self: center;
+    width: 128px;
+    max-width: 100%;
+    aspect-ratio: 8 / 5;
     padding: 0;
     border: 0;
-    background: var(--shell);
+    background: none;
     cursor: pointer;
     container-type: inline-size;
-    box-shadow:
-      0 0 0 3px var(--shell-edge),
-      5px 5px 0 3px var(--shadow);
+    filter: drop-shadow(4px 4px 0 var(--shadow));
     transition:
       transform 0.16s steps(3),
       opacity 0.2s steps(4),
@@ -282,7 +288,7 @@ const initial = Math.max(
   }
   .cart.dim {
     opacity: 0.3;
-    filter: grayscale(1);
+    filter: grayscale(1) drop-shadow(4px 4px 0 var(--shadow));
   }
 
   /* cursor ▶ */
@@ -307,65 +313,53 @@ const initial = Math.max(
     }
   }
 
-  /* arte PNG, recortado a la zona útil. Las esquinas superiores del PNG son
-     escalonadas (margen claro); el clip-path las corta y deja ver la carcasa. */
+  /* arte PNG de 128×80 */
   .art {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    clip-path: polygon(
-      2% 0,
-      98% 0,
-      98% 3.4%,
-      100% 3.4%,
-      100% 100%,
-      0 100%,
-      0 3.4%,
-      2% 3.4%
-    );
-  }
-  .art img {
     display: block;
-    max-width: none;
-    height: auto;
+    width: 100%;
+    height: 100%;
     image-rendering: pixelated;
   }
 
-  /* cartucho dibujado en CSS: ranuras laterales, etiqueta y ranura inferior */
-  .cart-css::before,
-  .cart-css::after {
-    content: '';
+  /* Cartucho dibujado en CSS para proyectos sin arte. Sigue la silueta del
+     arte de 128×80: hombros más bajos con ranuras, cara central, etiqueta
+     enmarcada en negro y ranura inferior. */
+  .shell {
+    position: absolute;
+    inset: 6.25% 0 0;
+    background: repeating-linear-gradient(
+        to bottom,
+        var(--shell) 0 9px,
+        var(--shell-lo) 9px 10px,
+        var(--shell-edge) 10px 11px
+      )
+      0 1px;
+    box-shadow: inset 0 0 0 1px var(--shell-outline);
+  }
+  .face {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 12%;
-    background: repeating-linear-gradient(
-      to bottom,
-      transparent 0 10px,
-      var(--shell-lo) 10px 13px
-    );
-  }
-  .cart-css::before {
-    left: 0;
-    border-right: 3px solid var(--shell-lo);
-  }
-  .cart-css::after {
-    right: 0;
-    border-left: 3px solid var(--shell-lo);
+    left: 14.8%;
+    right: 14.8%;
+    background: var(--shell);
+    border: 1px solid var(--shell-outline);
+    border-bottom: 0;
   }
   .lbl {
     position: absolute;
-    left: 17%;
-    right: 17%;
+    left: 18%;
+    right: 18%;
     top: 0;
-    height: 52%;
+    height: 45%;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2px 4px;
+    padding: 1px 3px;
     background: var(--lbl, var(--color-primary-container));
-    border: 3px solid var(--shell-lo);
-    border-top: 0;
+    border: 3px solid #000;
+    border-top-width: 1px;
+    box-shadow: 0 1px 0 var(--shell-hi);
     overflow: hidden;
   }
   .lbl b {
@@ -379,20 +373,12 @@ const initial = Math.max(
   }
   .groove {
     position: absolute;
-    left: 17%;
-    right: 17%;
-    top: 64%;
-    height: 10%;
-    background: var(--shell-lo);
-  }
-  .groove::after {
-    content: '';
-    position: absolute;
-    left: 30%;
-    right: 30%;
-    top: 35%;
-    height: 30%;
-    background: var(--shell-edge);
+    left: 18%;
+    right: 18%;
+    top: 60%;
+    height: 8.75%;
+    border: 1px solid var(--shell-lo);
+    border-bottom-color: var(--shell-hi);
   }
 
   /* bloqueado: etiqueta en estática */

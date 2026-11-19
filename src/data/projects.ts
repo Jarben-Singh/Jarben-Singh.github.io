@@ -16,11 +16,10 @@ export interface Project {
   /** Plataforma para los filtros. Sin plataforma solo aparece encendido con ALL. */
   platform?: Platform;
   /**
-   * Arte del cartucho (ruta dentro de /public). Los PNG traen un margen claro
-   * arriba y a la derecha: `trimTop` y `visibleWidth` (en px del PNG) marcan la
-   * zona útil que se muestra. Si falta, se dibuja el cartucho en CSS.
+   * Arte del cartucho: PNG de 128×80 px (proporción real 135×85 mm), ruta
+   * dentro de /public. Si falta, se dibuja el cartucho en CSS.
    */
-  cartridge?: { src: string; width: number; trimTop: number; visibleWidth: number };
+  cartridge?: string;
   /** Token de color (de global.css) para la etiqueta del cartucho dibujado en CSS. */
   label?: string;
   features: Localized<string[]>;
@@ -33,7 +32,7 @@ export const projects: Project[] = [
   {
     title: 'Focus Focus',
     platform: 'MOBILE',
-    cartridge: { src: 'img/cartridge-focus.png', width: 340, trimTop: 4, visibleWidth: 324 },
+    cartridge: 'img/cartridge-focus.png',
     features: {
       en: [
         'Mobile App with React Native',
@@ -54,7 +53,8 @@ export const projects: Project[] = [
   {
     title: 'SNES Tetris',
     platform: 'HARDWARE',
-    cartridge: { src: 'img/cartridge-tetris.png', width: 544, trimTop: 8, visibleWidth: 536 },
+    // TODO: redibujar a 128×80; el PNG anterior (544×296) no tiene la proporción real.
+    label: 'surface-container-lowest',
     features: {
       en: [
         'Written from scratch in 65816 Assembly',
