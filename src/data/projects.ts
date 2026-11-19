@@ -95,7 +95,7 @@ export const projects: Project[] = [
   {
     title: 'EDSAGUA / CESPE',
     platform: 'WEB',
-    label: 'primary-container',
+    cartridge: 'img/cartridge-ensagua.png',
     features: {
       en: [
         'Citizen water-service reporting',
