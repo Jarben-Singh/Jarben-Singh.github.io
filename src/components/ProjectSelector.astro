@@ -34,10 +34,15 @@ const platformLabel = Object.fromEntries(platforms.map((p) => [p.id, p.label])) 
   Localized<string>
 >;
 
-// Al cargar aparece seleccionado SNES Tetris.
+// Solo se muestran los filtros que tienen al menos un proyecto (más ALL).
+const filters = platforms.filter(
+  (f) => f.id === 'ALL' || projects.some((p) => p.platform === f.id),
+);
+
+// Al cargar aparece seleccionado Focus Focus.
 const initial = Math.max(
   0,
-  projects.findIndex((p) => p.title === 'SNES Tetris'),
+  projects.findIndex((p) => p.title === 'Focus Focus'),
 );
 ---
 
@@ -62,7 +67,7 @@ const initial = Math.max(
   <div class="pg-filters" role="group" aria-labelledby="pg-filters-label">
     <span id="pg-filters-label" class="sr-only"><T v={ui.filters} /></span>
     {
-      platforms.map((p) => (
+      filters.map((p) => (
         <button
           type="button"
           class="fbtn"
