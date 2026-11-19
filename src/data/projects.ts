@@ -53,8 +53,7 @@ export const projects: Project[] = [
   {
     title: 'SNES Tetris',
     platform: 'HARDWARE',
-    // TODO: redibujar a 128×80; el PNG anterior (544×296) no tiene la proporción real.
-    label: 'surface-container-lowest',
+    cartridge: 'img/cartridge-tetris.png',
     features: {
       en: [
         'Written from scratch in 65816 Assembly',
