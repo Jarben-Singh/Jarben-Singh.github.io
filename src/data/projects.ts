@@ -74,7 +74,7 @@ export const projects: Project[] = [
   {
     title: 'Land Sales System',
     platform: 'WEB',
-    label: 'secondary-container',
+    cartridge: 'img/cartridge-rancho.png',
     features: {
       en: [
         'Full-stack web application',
