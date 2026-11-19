@@ -1,8 +1,30 @@
+export type Lang = 'en' | 'es';
+export type Localized<T> = Record<Lang, T>;
+export type Platform = 'WEB' | 'MOBILE' | 'GAME' | 'HARDWARE';
+
+/** Filtros del estante, en orden. */
+export const platforms: { id: Platform | 'ALL'; label: Localized<string> }[] = [
+  { id: 'ALL', label: { en: 'ALL', es: 'TODOS' } },
+  { id: 'WEB', label: { en: 'WEB', es: 'WEB' } },
+  { id: 'MOBILE', label: { en: 'MOBILE', es: 'MÓVIL' } },
+  { id: 'GAME', label: { en: 'GAME', es: 'JUEGO' } },
+  { id: 'HARDWARE', label: { en: 'HARDWARE', es: 'HARDWARE' } },
+];
+
 export interface Project {
   title: string;
-  /** Ruta dentro de /public. Si falta, se dibuja un cartucho genérico. */
-  cartridge?: string;
-  features: string[];
+  /** Plataforma para los filtros. Sin plataforma solo aparece encendido con ALL. */
+  platform?: Platform;
+  /**
+   * Arte del cartucho (ruta dentro de /public). Los PNG traen un margen claro
+   * arriba y a la derecha: `trimTop` y `visibleWidth` (en px del PNG) marcan la
+   * zona útil que se muestra. Si falta, se dibuja el cartucho en CSS.
+   */
+  cartridge?: { src: string; width: number; trimTop: number; visibleWidth: number };
+  /** Token de color (de global.css) para la etiqueta del cartucho dibujado en CSS. */
+  label?: string;
+  features: Localized<string[]>;
+  stack: string[];
   href?: string;
   locked?: boolean;
 }
@@ -10,64 +32,126 @@ export interface Project {
 export const projects: Project[] = [
   {
     title: 'Focus Focus',
-    cartridge: 'img/cartridge-focus.png',
-    features: [
-      'Mobile App with React Native',
-      'Tool against procrastination',
-      'Gamification system',
-      'Widgets and native features',
-    ],
+    platform: 'MOBILE',
+    cartridge: { src: 'img/cartridge-focus.png', width: 340, trimTop: 4, visibleWidth: 324 },
+    features: {
+      en: [
+        'Mobile App with React Native',
+        'Tool against procrastination',
+        'Gamification system',
+        'Widgets and native features',
+      ],
+      es: [
+        'App móvil con React Native',
+        'Herramienta contra la procrastinación',
+        'Sistema de gamificación',
+        'Widgets y funciones nativas',
+      ],
+    },
+    stack: ['React Native'],
     href: '#',
   },
   {
     title: 'SNES Tetris',
-    cartridge: 'img/cartridge-tetris.png',
-    features: [
-      'Written from scratch in 65816 Assembly',
-      'Runs on real Super Nintendo hardware',
-      'Built with the WLA-DX toolchain',
-      'Custom graphics and sound routines',
-    ],
+    platform: 'HARDWARE',
+    cartridge: { src: 'img/cartridge-tetris.png', width: 544, trimTop: 8, visibleWidth: 536 },
+    features: {
+      en: [
+        'Written from scratch in 65816 Assembly',
+        'Runs on real Super Nintendo hardware',
+        'Built with the WLA-DX toolchain',
+        'Custom graphics and sound routines',
+      ],
+      es: [
+        'Escrito desde cero en ensamblador 65816',
+        'Corre en hardware real de Super Nintendo',
+        'Hecho con la toolchain WLA-DX',
+        'Rutinas propias de gráficos y sonido',
+      ],
+    },
+    stack: ['65816 Assembly', 'WLA-DX'],
     href: '#',
   },
   {
     title: 'Land Sales System',
-    features: [
-      'Full-stack web application',
-      'Lot inventory and sales tracking',
-      'React + Spring Boot + MySQL',
-      'Built for Rancho Delgado',
-    ],
+    platform: 'WEB',
+    label: 'secondary-container',
+    features: {
+      en: [
+        'Full-stack web application',
+        'Lot inventory and sales tracking',
+        'React + Spring Boot + MySQL',
+        'Built for Rancho Delgado',
+      ],
+      es: [
+        'Aplicación web full-stack',
+        'Inventario de lotes y control de ventas',
+        'React + Spring Boot + MySQL',
+        'Hecho para Rancho Delgado',
+      ],
+    },
+    stack: ['React', 'Spring Boot', 'MySQL'],
     href: '#',
   },
   {
     title: 'EDSAGUA / CESPE',
-    features: [
-      'Citizen water-service reporting',
-      'Infrastructure incident telemetry',
-      'Spring Boot + JavaScript',
-      'Made for municipal utilities',
-    ],
+    platform: 'WEB',
+    label: 'primary-container',
+    features: {
+      en: [
+        'Citizen water-service reporting',
+        'Infrastructure incident telemetry',
+        'Spring Boot + JavaScript',
+        'Made for municipal utilities',
+      ],
+      es: [
+        'Reportes ciudadanos del servicio de agua',
+        'Telemetría de incidentes de infraestructura',
+        'Spring Boot + JavaScript',
+        'Hecho para organismos municipales de agua',
+      ],
+    },
+    stack: ['Spring Boot', 'JavaScript'],
     href: '#',
   },
   {
     title: 'Rollback Fighter',
-    features: [
-      'Two-cube fighting game in C++',
-      'Deterministic UDP rollback netcode',
-      'Frame prediction and re-simulation',
-      'Online play with minimal latency',
-    ],
+    platform: 'GAME',
+    label: 'error-container',
+    features: {
+      en: [
+        'Two-cube fighting game in C++',
+        'Deterministic UDP rollback netcode',
+        'Frame prediction and re-simulation',
+        'Online play with minimal latency',
+      ],
+      es: [
+        'Juego de pelea de dos cubos en C++',
+        'Netcode rollback determinista sobre UDP',
+        'Predicción de frames y re-simulación',
+        'Juego en línea con latencia mínima',
+      ],
+    },
+    stack: ['C++', 'UDP'],
     href: '#',
   },
   {
     title: 'Classified',
-    features: [
-      'A new game / systems project',
-      'Currently compiling in local dev',
-      'Details are locked for now',
-      'Stay tuned for Stage 02',
-    ],
+    features: {
+      en: [
+        'A new game / systems project',
+        'Currently compiling in local dev',
+        'Details are locked for now',
+        'Stay tuned for Stage 02',
+      ],
+      es: [
+        'Un nuevo proyecto de juego / sistemas',
+        'Compilando en desarrollo local',
+        'Los detalles están bloqueados por ahora',
+        'Atento al Stage 02',
+      ],
+    },
+    stack: [],
     locked: true,
   },
 ];

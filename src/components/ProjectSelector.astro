@@ -1,5 +1,6 @@
 ---
-import { projects } from '../data/projects';
+import { projects, platforms, type Localized, type Platform } from '../data/projects';
+import T from './T.astro';
 
 const base = import.meta.env.BASE_URL;
 
@@ -16,9 +17,31 @@ const star = [
 const starRects = star.flatMap((row, y) =>
   [...row.matchAll(/#+/g)].map((m) => ({ x: m.index!, y, w: m[0].length })),
 );
+
+const ui = {
+  heading: { en: 'SELECT A PROJECT', es: 'ELIGE UN PROYECTO' },
+  filters: { en: 'Filter by platform', es: 'Filtrar por plataforma' },
+  nowPlaying: { en: 'NOW PLAYING', es: 'EN JUEGO' },
+  noSignal: { en: 'NO SIGNAL', es: 'SIN SEÑAL' },
+  denied: { en: 'ACCESS DENIED', es: 'ACCESO DENEGADO' },
+  stage: { en: 'STAGE 02 IN PROGRESS', es: 'STAGE 02 EN PROGRESO' },
+  more: { en: 'MORE DETAILS', es: 'MÁS DETALLES' },
+  locked: { en: 'LOCKED', es: 'BLOQUEADO' },
+} satisfies Record<string, Localized<string>>;
+
+const platformLabel = Object.fromEntries(platforms.map((p) => [p.id, p.label])) as Record<
+  Platform,
+  Localized<string>
+>;
+
+// Al cargar aparece seleccionado SNES Tetris.
+const initial = Math.max(
+  0,
+  projects.findIndex((p) => p.title === 'SNES Tetris'),
+);
 ---
 
-<section id="project-grid" class="w-full mt-12">
+<section id="project-grid" class="w-full mt-12" aria-labelledby="pg-title">
   <!-- Header -->
   <div
     class="bg-surface-container border-4 border-outline-variant shadow-[4px_4px_0px_0px_#01043e] p-4 flex items-center gap-3"
@@ -30,81 +53,638 @@ const starRects = star.flatMap((row, y) =>
         >$</span
       >
     </div>
-    <h2 class="font-pixel text-sm sm:text-base text-primary-fixed tracking-wide">
-      SELECT A PROJECT
+    <h2 id="pg-title" class="font-pixel text-sm sm:text-base text-primary-fixed tracking-wide">
+      <T v={ui.heading} />
     </h2>
   </div>
 
-  <ul class="flex flex-col mt-10">
+  <!-- Filtros -->
+  <div class="pg-filters" role="group" aria-labelledby="pg-filters-label">
+    <span id="pg-filters-label" class="sr-only"><T v={ui.filters} /></span>
     {
-      projects.map((project, i) => (
-        <li
-          class:list={[
-            'grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-6 items-center py-10',
-            i > 0 && 'border-t-4 border-dashed border-outline-variant/40',
-          ]}
+      platforms.map((p) => (
+        <button
+          type="button"
+          class="fbtn"
+          data-filter={p.id}
+          aria-pressed={String(p.id === 'ALL')}
         >
-          <!-- Cartucho -->
-          <div class="flex justify-center">
-            {project.cartridge ? (
-              <img
-                src={`${base}${project.cartridge}`}
-                alt={`${project.title} cartridge`}
-                class="w-full max-w-[340px] h-auto block [image-rendering:pixelated]"
-                draggable="false"
-              />
-            ) : (
-              <div class="relative w-full max-w-[340px] aspect-[340/199] bg-[#7f7f7f] border-x-[6px] border-[#5a5a5a] [image-rendering:pixelated]">
-                <div class="absolute inset-x-[18%] top-[6%] h-[44%] bg-[#0033ff] border-4 border-[#5a5a5a] flex items-center justify-center text-center p-1">
-                  <span class="font-pixel text-[10px] sm:text-xs text-white leading-tight uppercase">
-                    {project.title}
-                  </span>
-                </div>
-                <div class="absolute inset-x-[7%] top-[60%] h-[12%] bg-[#5a5a5a]" />
-                <div class="absolute inset-x-[38%] top-[64%] h-[3%] bg-[#333]" />
-              </div>
-            )}
-          </div>
-
-          <!-- Detalles -->
-          <div class="text-center md:text-left md:pl-6">
-            <h3 class="font-pixel text-xl sm:text-2xl text-white tracking-wide mb-8">
-              {project.title}
-            </h3>
-            <ul class="inline-flex flex-col gap-4 text-left mb-10">
-              {project.features.map((feature) => (
-                <li class="flex items-center gap-3 font-body-md text-body-md text-on-surface">
-                  <svg
-                    viewBox="0 0 7 7"
-                    class="w-5 h-5 shrink-0 text-[#ffd23f]"
-                    shape-rendering="crispEdges"
-                    aria-hidden="true"
-                  >
-                    {starRects.map((r) => (
-                      <rect x={r.x} y={r.y} width={r.w} height="1" fill="currentColor" />
-                    ))}
-                  </svg>
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <div>
-              {project.locked ? (
-                <span class="inline-block px-8 py-2 border-2 border-outline-variant font-pixel text-[10px] text-outline cursor-not-allowed">
-                  LOCKED
-                </span>
-              ) : (
-                <a
-                  href={project.href}
-                  class="inline-block px-8 py-2 border-2 border-primary-fixed-dim bg-surface-container-lowest font-pixel text-[10px] text-white hover:bg-primary-container transition-colors"
-                >
-                  MORE DETAILS
-                </a>
-              )}
-            </div>
-          </div>
-        </li>
+          <T v={p.label} />
+        </button>
       ))
     }
-  </ul>
+  </div>
+
+  <div class="pg-layout">
+    <!-- Estante -->
+    <div class="shelf" data-shelf role="group" aria-labelledby="pg-title">
+      {
+        projects.map((p, i) => (
+          <button
+            type="button"
+            class:list={['cart', !p.cartridge && 'cart-css', p.locked && 'locked']}
+            data-cart
+            data-platform={p.platform ?? ''}
+            aria-pressed={String(i === initial)}
+            aria-controls="pg-screen"
+            tabindex={i === initial ? 0 : -1}
+            style={p.label ? `--lbl: var(--color-${p.label})` : undefined}
+          >
+            <span class="cur" aria-hidden="true">
+              ▶
+            </span>
+            {p.cartridge ? (
+              <span class="art">
+                <img
+                  src={`${base}${p.cartridge.src}`}
+                  alt={p.title}
+                  draggable="false"
+                  style={`width: calc(100% * ${p.cartridge.width} / ${p.cartridge.visibleWidth}); margin-top: calc(-100% * ${p.cartridge.trimTop} / ${p.cartridge.visibleWidth})`}
+                />
+              </span>
+            ) : (
+              <>
+                <span class="lbl">
+                  <b>{p.title}</b>
+                </span>
+                <span class="groove" aria-hidden="true" />
+              </>
+            )}
+            {p.locked && (
+              <span class="sr-only">
+                (<T v={ui.locked} />)
+              </span>
+            )}
+          </button>
+        ))
+      }
+    </div>
+
+    <!-- Tele -->
+    <div class="tv" data-tv>
+      <div class="tv-screen" id="pg-screen" data-screen aria-live="polite">
+        {
+          projects.map((p, i) => (
+            <div class="tv-panel" data-panel data-active={i === initial ? '' : undefined}>
+              <div class="tv-hd">
+                <T v={p.locked ? ui.noSignal : ui.nowPlaying} />
+                <span class="rec">● SLOT A</span>
+              </div>
+              <h3 class="tv-title">{p.locked ? p.title.toUpperCase() : p.title}</h3>
+              {p.platform && (
+                <p class="tv-sub">
+                  <T v={platformLabel[p.platform]} />
+                </p>
+              )}
+              {p.locked && (
+                <p class="denied">
+                  <T v={ui.denied} />
+                  <br />
+                  <T v={ui.stage} />
+                </p>
+              )}
+              {(['en', 'es'] as const).map((lang) => (
+                <ul class="stars" data-lang={lang}>
+                  {p.features[lang].map((feature) => (
+                    <li>
+                      <svg viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true">
+                        {starRects.map((r) => (
+                          <rect x={r.x} y={r.y} width={r.w} height="1" fill="currentColor" />
+                        ))}
+                      </svg>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              ))}
+              {p.stack.length > 0 && (
+                <ul class="chips" aria-label="Stack">
+                  {p.stack.map((s) => (
+                    <li>{s}</li>
+                  ))}
+                </ul>
+              )}
+              <div class="tv-actions">
+                {p.locked ? (
+                  <span class="inline-block px-8 py-2 border-2 border-outline-variant font-pixel text-[10px] text-outline cursor-not-allowed">
+                    <T v={ui.locked} />
+                  </span>
+                ) : (
+                  <a
+                    href={p.href}
+                    class="inline-block px-8 py-2 border-2 border-primary-fixed-dim bg-surface-container-lowest font-pixel text-[10px] text-white hover:bg-primary-container transition-colors"
+                  >
+                    <T v={ui.more} /> ▶
+                  </a>
+                )}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+      <div class="tv-base" aria-hidden="true">
+        <span class="led"></span><span>POWER</span><span class="tv-slot"></span><span
+          >PLAYER 1</span
+        >
+      </div>
+    </div>
+  </div>
 </section>
+
+<style>
+  #project-grid {
+    /* Grises del cartucho: los mismos del arte PNG */
+    --shell: #7f7f7f;
+    --shell-lo: #5a5a5a;
+    --shell-edge: #2f2e2d;
+    --star: #ffd23f;
+    --shadow: var(--color-surface-container-lowest);
+  }
+
+  #project-grid :focus-visible {
+    outline: 3px solid var(--star);
+    outline-offset: 3px;
+  }
+
+  /* ---------- filtros ---------- */
+  .pg-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 2rem;
+    margin-bottom: 1.25rem;
+  }
+  .fbtn {
+    font-family: var(--font-pixel);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    padding: 9px 10px 8px;
+    background: var(--color-surface-container);
+    color: var(--color-on-surface-variant);
+    box-shadow: inset 0 0 0 2px var(--color-outline-variant);
+    cursor: pointer;
+  }
+  .fbtn:hover {
+    color: var(--color-on-surface);
+    box-shadow: inset 0 0 0 2px var(--color-secondary);
+  }
+  .fbtn[aria-pressed='true'] {
+    background: var(--color-primary-container);
+    color: var(--color-tertiary-fixed);
+    box-shadow: inset 0 0 0 2px var(--color-tertiary-fixed);
+  }
+
+  /* ---------- layout ---------- */
+  .pg-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  /* ---------- estante ---------- */
+  .shelf {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 34px 22px;
+    padding: 30px 26px 30px;
+    background: var(--color-surface-container);
+    border: 4px solid var(--color-outline-variant);
+    box-shadow: 4px 4px 0 0 var(--shadow);
+  }
+
+  .cart {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 1;
+    padding: 0;
+    border: 0;
+    background: var(--shell);
+    cursor: pointer;
+    container-type: inline-size;
+    box-shadow:
+      0 0 0 3px var(--shell-edge),
+      5px 5px 0 3px var(--shadow);
+    transition:
+      transform 0.16s steps(3),
+      opacity 0.2s steps(4),
+      filter 0.2s steps(4);
+  }
+  .cart:hover {
+    transform: translateY(-3px);
+  }
+  .cart[aria-pressed='true'] {
+    transform: translateY(-7px);
+  }
+  .cart:focus-visible {
+    outline-offset: 7px;
+  }
+  .cart.dim {
+    opacity: 0.3;
+    filter: grayscale(1);
+  }
+
+  /* cursor ▶ */
+  .cur {
+    position: absolute;
+    left: -17px;
+    top: 50%;
+    translate: 0 -50%;
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    line-height: 1;
+    color: var(--star);
+    opacity: 0;
+  }
+  .cart[aria-pressed='true'] .cur {
+    opacity: 1;
+    animation: pg-blink 1s steps(1) infinite;
+  }
+  @keyframes pg-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* arte PNG, recortado a la zona útil. Las esquinas superiores del PNG son
+     escalonadas (margen claro); el clip-path las corta y deja ver la carcasa. */
+  .art {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    clip-path: polygon(
+      2% 0,
+      98% 0,
+      98% 3.4%,
+      100% 3.4%,
+      100% 100%,
+      0 100%,
+      0 3.4%,
+      2% 3.4%
+    );
+  }
+  .art img {
+    display: block;
+    max-width: none;
+    height: auto;
+    image-rendering: pixelated;
+  }
+
+  /* cartucho dibujado en CSS: ranuras laterales, etiqueta y ranura inferior */
+  .cart-css::before,
+  .cart-css::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 12%;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0 10px,
+      var(--shell-lo) 10px 13px
+    );
+  }
+  .cart-css::before {
+    left: 0;
+    border-right: 3px solid var(--shell-lo);
+  }
+  .cart-css::after {
+    right: 0;
+    border-left: 3px solid var(--shell-lo);
+  }
+  .lbl {
+    position: absolute;
+    left: 17%;
+    right: 17%;
+    top: 0;
+    height: 52%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 4px;
+    background: var(--lbl, var(--color-primary-container));
+    border: 3px solid var(--shell-lo);
+    border-top: 0;
+    overflow: hidden;
+  }
+  .lbl b {
+    font-family: var(--font-pixel);
+    font-weight: 400;
+    font-size: clamp(6px, 5.4cqi, 10px);
+    line-height: 1.35;
+    color: #fff;
+    text-align: center;
+    text-transform: uppercase;
+  }
+  .groove {
+    position: absolute;
+    left: 17%;
+    right: 17%;
+    top: 64%;
+    height: 10%;
+    background: var(--shell-lo);
+  }
+  .groove::after {
+    content: '';
+    position: absolute;
+    left: 30%;
+    right: 30%;
+    top: 35%;
+    height: 30%;
+    background: var(--shell-edge);
+  }
+
+  /* bloqueado: etiqueta en estática */
+  .cart.locked .lbl {
+    background:
+      repeating-linear-gradient(
+        90deg,
+        rgb(223 224 255 / 0.16) 0 2px,
+        transparent 2px 5px,
+        rgb(1 4 62 / 0.55) 5px 7px,
+        transparent 7px 11px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        var(--color-surface-bright) 0 2px,
+        var(--color-surface-container) 2px 3px,
+        var(--color-outline-variant) 3px 6px,
+        var(--color-surface-container-lowest) 6px 7px
+      );
+    background-size:
+      13px 100%,
+      100% 17px;
+    animation: pg-static 0.5s steps(1) infinite;
+  }
+  .cart.locked .lbl b {
+    padding: 2px 3px 1px;
+    background: var(--color-surface-container-lowest);
+    color: var(--color-on-surface-variant);
+  }
+  @keyframes pg-static {
+    0% {
+      background-position: 0 0, 0 0;
+    }
+    25% {
+      background-position: 7px 0, 0 9px;
+    }
+    50% {
+      background-position: 3px 0, 0 4px;
+    }
+    75% {
+      background-position: 10px 0, 0 13px;
+    }
+  }
+
+  /* ---------- tele ---------- */
+  .tv {
+    position: sticky;
+    top: 6rem;
+    padding: 14px 14px 0;
+    background: var(--color-on-surface-variant);
+    box-shadow:
+      inset 6px 6px 0 var(--color-secondary-fixed),
+      inset -6px -6px 0 var(--color-outline),
+      8px 8px 0 var(--color-indigo-shadow);
+  }
+  .tv-screen {
+    position: relative;
+    display: grid;
+    padding: 20px 20px 22px;
+    background: var(--color-surface-container-lowest);
+    box-shadow: inset 0 0 0 4px #000;
+    overflow: hidden;
+  }
+  .tv-screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0 2px,
+      rgb(0 0 0 / 0.28) 2px 3px
+    );
+  }
+  .tv-screen.boot {
+    animation: pg-boot 0.38s steps(5);
+  }
+  @keyframes pg-boot {
+    0% {
+      clip-path: inset(49% 0 49% 0);
+      filter: brightness(4);
+    }
+    60% {
+      clip-path: inset(10% 0 10% 0);
+      filter: brightness(1.6);
+    }
+    100% {
+      clip-path: inset(0);
+      filter: none;
+    }
+  }
+
+  /* Todos los paneles comparten la misma celda: la pantalla mide lo que el más
+     alto y no cambia de tamaño al cambiar de cartucho. */
+  .tv-panel {
+    grid-area: 1 / 1;
+    display: grid;
+    gap: 14px;
+    align-content: start;
+    visibility: hidden;
+  }
+  .tv-panel[data-active] {
+    visibility: visible;
+  }
+
+  .tv-hd {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: var(--font-pixel);
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    color: var(--color-outline);
+  }
+  .tv-hd .rec {
+    color: var(--star);
+  }
+  .tv-title {
+    font-family: var(--font-pixel);
+    font-size: clamp(13px, 1.8vw, 17px);
+    line-height: 1.45;
+    color: #fff;
+  }
+  .tv-sub {
+    margin-top: -6px;
+    font-family: var(--font-pixel);
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    color: var(--color-secondary);
+  }
+  .denied {
+    font-family: var(--font-pixel);
+    font-size: 11px;
+    line-height: 1.8;
+    color: var(--color-tertiary-fixed);
+  }
+  .stars {
+    display: grid;
+    gap: 10px;
+    font-family: var(--font-body-md);
+    font-size: var(--text-body-sm);
+    line-height: var(--text-body-sm--line-height);
+    color: var(--color-on-surface);
+  }
+  .stars li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .stars svg {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    margin-top: 2px;
+    color: var(--star);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chips li {
+    padding: 2px 8px;
+    font-family: var(--font-label-sm);
+    font-size: 11px;
+    color: var(--color-secondary);
+    box-shadow: inset 0 0 0 2px var(--color-outline-variant);
+  }
+  .tv-actions {
+    padding-top: 4px;
+  }
+
+  .tv-base {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 4px 12px;
+    font-family: var(--font-pixel);
+    font-size: 7px;
+    letter-spacing: 0.08em;
+    color: var(--color-outline-variant);
+  }
+  .led {
+    width: 8px;
+    height: 8px;
+    background: var(--color-error-container);
+    box-shadow: 0 0 6px var(--color-error);
+  }
+  .tv-slot {
+    flex: 1;
+    height: 6px;
+    background: var(--color-outline);
+    box-shadow: inset 0 2px 0 var(--color-outline-variant);
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 859px) {
+    .pg-layout {
+      grid-template-columns: 1fr;
+    }
+    .tv {
+      position: static;
+      order: -1;
+    }
+  }
+  @media (max-width: 539px) {
+    .shelf {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 30px 20px;
+      padding: 26px 22px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cart,
+    .cart *,
+    .tv-screen {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+</style>
+
+<script>
+  const root = document.getElementById('project-grid');
+  const shelf = root?.querySelector<HTMLElement>('[data-shelf]');
+  const screen = root?.querySelector<HTMLElement>('[data-screen]');
+  const tv = root?.querySelector<HTMLElement>('[data-tv]');
+
+  if (root && shelf && screen && tv) {
+    const carts = [...shelf.querySelectorAll<HTMLButtonElement>('[data-cart]')];
+    const panels = [...screen.querySelectorAll<HTMLElement>('[data-panel]')];
+    const filters = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    const mobile = matchMedia('(max-width: 859px)');
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+    const select = (i: number) => {
+      carts.forEach((c, k) => {
+        c.setAttribute('aria-pressed', String(k === i));
+        c.tabIndex = k === i ? 0 : -1;
+      });
+      panels.forEach((p, k) => p.toggleAttribute('data-active', k === i));
+
+      if (!reducedMotion.matches) {
+        screen.classList.remove('boot');
+        void screen.offsetWidth; // reinicia la animación
+        screen.classList.add('boot');
+      }
+
+      // En móvil la tele queda arriba del estante: si no se ve, la traemos.
+      if (mobile.matches) {
+        const r = tv.getBoundingClientRect();
+        const offset = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+        if (r.top < offset || r.bottom > innerHeight) {
+          tv.scrollIntoView({ block: 'start', behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+        }
+      }
+    };
+
+    carts.forEach((c, i) => c.addEventListener('click', () => select(i)));
+
+    // Flechas: mueven el foco por el grid (roving tabindex). Enter/Espacio
+    // seleccionan porque cada cartucho es un <button>.
+    shelf.addEventListener('keydown', (e) => {
+      const i = carts.indexOf(document.activeElement as HTMLButtonElement);
+      if (i < 0) return;
+      const cols = getComputedStyle(shelf).gridTemplateColumns.split(' ').length;
+      const step: Record<string, number> = {
+        ArrowRight: 1,
+        ArrowLeft: -1,
+        ArrowDown: cols,
+        ArrowUp: -cols,
+        Home: -i,
+        End: carts.length - 1 - i,
+      };
+      if (!(e.key in step)) return;
+      e.preventDefault();
+      const j = i + step[e.key];
+      if (j < 0 || j >= carts.length) return;
+      carts[i].tabIndex = -1;
+      carts[j].tabIndex = 0;
+      carts[j].focus();
+    });
+
+    filters.forEach((f) =>
+      f.addEventListener('click', () => {
+        const value = f.dataset.filter;
+        filters.forEach((x) => x.setAttribute('aria-pressed', String(x === f)));
+        carts.forEach((c) =>
+          c.classList.toggle('dim', value !== 'ALL' && c.dataset.platform !== value),
+        );
+      }),
+    );
+  }
+</script>

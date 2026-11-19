@@ -56,15 +56,27 @@ const links = [
           <div class="w-1.5 h-3 bg-outline-variant"></div>
         </div>
       </div>
-      <div class="flex border-2 border-outline-variant bg-surface-container-lowest">
-        <button
-          class="px-2 py-1 font-pixel text-[9px] bg-primary-container text-tertiary-fixed border-r border-outline-variant"
-          type="button">EN</button
-        >
-        <button
-          class="px-2 py-1 font-pixel text-[9px] text-on-surface-variant hover:text-on-surface"
-          type="button">ES</button
-        >
+      <div
+        class="flex border-2 border-outline-variant bg-surface-container-lowest"
+        role="group"
+        aria-label="Language / Idioma"
+      >
+        {
+          (['en', 'es'] as const).map((lang, i) => (
+            <button
+              class:list={[
+                'px-2 py-1 font-pixel text-[9px] text-on-surface-variant hover:text-on-surface aria-pressed:bg-primary-container aria-pressed:text-tertiary-fixed',
+                i === 0 && 'border-r border-outline-variant',
+              ]}
+              type="button"
+              lang={lang}
+              data-set-lang={lang}
+              aria-pressed={String(lang === 'en')}
+            >
+              {lang.toUpperCase()}
+            </button>
+          ))
+        }
       </div>
       <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
         <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
@@ -72,3 +84,26 @@ const links = [
     </div>
   </div>
 </header>
+
+<script>
+  // Cambio EN/ES: actualiza <html lang> (global.css muestra el texto que
+  // corresponde) y guarda la elección para la próxima visita.
+  const langButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-set-lang]')];
+
+  const applyLang = (lang: string) => {
+    document.documentElement.lang = lang;
+    langButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.setLang === lang)));
+  };
+
+  applyLang(document.documentElement.lang === 'es' ? 'es' : 'en');
+
+  langButtons.forEach((b) =>
+    b.addEventListener('click', () => {
+      const lang = b.dataset.setLang ?? 'en';
+      applyLang(lang);
+      try {
+        localStorage.setItem('lang', lang);
+      } catch {}
+    }),
+  );
+</script>

@@ -1,0 +1,13 @@
+---
+// Texto bilingüe: se renderizan ambos idiomas y global.css oculta el que no
+// coincide con <html lang>. Así el cambio EN/ES no necesita volver a renderizar.
+import type { Localized } from '../data/projects';
+
+interface Props {
+  v: Localized<string>;
+}
+
+const { v } = Astro.props;
+---
+
+<span data-lang="en">{v.en}</span><span data-lang="es">{v.es}</span>

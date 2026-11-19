@@ -143,6 +143,13 @@
   }
 }
 
+/* Idioma: el contenido bilingüe se renderiza en EN y ES (ver components/T.astro)
+   y aquí se oculta el que no coincide con <html lang>. EN es el idioma por defecto. */
+html:not([lang="es"]) [data-lang="es"],
+html[lang="es"] [data-lang="en"] {
+  display: none !important;
+}
+
 ::-webkit-scrollbar {
   display: none;
 }
