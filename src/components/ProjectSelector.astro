@@ -26,6 +26,7 @@ const ui = {
   denied: { en: 'ACCESS DENIED', es: 'ACCESO DENEGADO' },
   stage: { en: 'STAGE 02 IN PROGRESS', es: 'STAGE 02 EN PROGRESO' },
   more: { en: 'MORE DETAILS', es: 'MÁS DETALLES' },
+  nextCh: { en: 'Next channel (next project)', es: 'Siguiente canal (siguiente proyecto)' },
   locked: { en: 'LOCKED', es: 'BLOQUEADO' },
 } satisfies Record<string, Localized<string>>;
 
@@ -207,7 +208,7 @@ const antenna = [
                       ) : (
                         <a
                           href={p.href}
-                          class="inline-block px-8 py-2 border-2 border-primary-fixed-dim bg-surface-container-lowest font-pixel text-[10px] text-white hover:bg-primary-container transition-colors"
+                          class="more-btn"
                         >
                           <T v={ui.more} /> ▶
                         </a>
@@ -220,19 +221,28 @@ const antenna = [
           </div>
         </div>
         <!-- Panel de controles lateral -->
-        <div class="tv-side" aria-hidden="true">
-          <span class="tv-brand">JD-19</span>
-          <span class="tv-ch" data-ch>{channel(initial)}</span>
-          <span class="knob-wrap">
-            <span class="knob"><span class="knob-cap" data-knob="ch"></span></span>
-            <span class="knob-lbl">CH</span>
-          </span>
-          <span class="knob-wrap">
+        <div class="tv-side">
+          <span class="tv-brand" aria-hidden="true">JD-19</span>
+          <span class="tv-ch" data-ch aria-hidden="true">{channel(initial)}</span>
+          <!-- La perilla CH cambia al siguiente proyecto -->
+          <button
+            type="button"
+            class="knob-wrap knob-btn"
+            data-next-ch
+            aria-controls="pg-screen"
+          >
+            <span class="knob" aria-hidden="true"
+              ><span class="knob-cap" data-knob="ch"></span></span
+            >
+            <span class="knob-lbl" aria-hidden="true">CH</span>
+            <span class="sr-only"><T v={ui.nextCh} /></span>
+          </button>
+          <span class="knob-wrap" aria-hidden="true">
             <span class="knob"><span class="knob-cap" data-knob="vol"></span></span>
             <span class="knob-lbl">VOL</span>
           </span>
-          <span class="tv-grille"></span>
-          <span class="tv-btns"><span></span><span></span><span></span></span>
+          <span class="tv-grille" aria-hidden="true"></span>
+          <span class="tv-btns" aria-hidden="true"><span></span><span></span><span></span></span>
         </div>
         <div class="tv-base" aria-hidden="true">
           <span class="led"></span><span>POWER</span><span class="tv-slot"></span><span
@@ -493,7 +503,9 @@ const antenna = [
   /* Tele de caja: antena de conejo, gabinete con esquinas escalonadas,
      marco hundido alrededor del tubo, panel lateral de perillas y bocina,
      franja inferior y patas. La sombra va en .tv con drop-shadow para que
-     siga la silueta recortada (antena y patas incluidas). */
+     siga la silueta recortada (antena y patas incluidas).
+     No se desplaza con el scroll: queda apoyada a la altura de la base
+     del estante (align-self: end en la fila del grid). */
   .tv {
     --plastic: var(--color-on-surface-variant);
     --plastic-hi: var(--color-secondary-fixed);
@@ -501,8 +513,7 @@ const antenna = [
     --plastic-dk: #5a5c70;
     --bezel: #2c2e40;
     --bezel-dk: #15161f;
-    position: sticky;
-    top: 6rem;
+    align-self: end;
     container: tv / inline-size;
     filter: drop-shadow(8px 8px 0 var(--color-indigo-shadow));
   }
@@ -713,6 +724,38 @@ const antenna = [
   .tv-actions {
     padding-top: 4px;
   }
+  /* Botón MORE DETAILS: amarillo de las estrellas, con relieve pixel. Al
+     pasar el mouse se aclara y se levanta; al presionarlo se hunde. */
+  .more-btn {
+    display: inline-block;
+    padding: 9px 32px 8px;
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    color: var(--color-surface-container-lowest);
+    background: var(--star);
+    box-shadow:
+      inset -3px -3px 0 #c99a12,
+      inset 3px 3px 0 #ffe98a,
+      4px 4px 0 #000;
+    transition:
+      background-color 0.12s steps(2),
+      translate 0.12s steps(2),
+      box-shadow 0.12s steps(2);
+  }
+  .more-btn:hover {
+    background: #ffe36b;
+    translate: -2px -2px;
+    box-shadow:
+      inset -3px -3px 0 #d9a91a,
+      inset 3px 3px 0 #fff4c2,
+      6px 6px 0 #000;
+  }
+  .more-btn:active {
+    translate: 2px 2px;
+    box-shadow:
+      inset 3px 3px 0 #c99a12,
+      2px 2px 0 #000;
+  }
 
   /* ---------- panel lateral ---------- */
   .tv-side {
@@ -784,6 +827,21 @@ const antenna = [
     width: 4px;
     height: 12px;
     background: var(--bezel);
+  }
+  .knob-btn {
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .knob-btn:hover .knob-cap::before {
+    background: var(--plastic-hi);
+  }
+  .knob-btn:active .knob {
+    translate: 0 2px;
+  }
+  .knob-btn:focus-visible {
+    outline-offset: 2px;
   }
   .knob-cap[data-knob='vol'] {
     rotate: -60deg;
@@ -901,7 +959,6 @@ const antenna = [
       grid-template-columns: 1fr;
     }
     .tv {
-      position: static;
       order: -1;
     }
   }
@@ -930,8 +987,16 @@ const antenna = [
     const mobile = matchMedia('(max-width: 1023px)');
     const ch = tv.querySelector<HTMLElement>('[data-ch]');
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    const nextCh = tv.querySelector<HTMLButtonElement>('[data-next-ch]');
 
-    const select = (i: number) => {
+    let current = carts.findIndex((c) => c.getAttribute('aria-pressed') === 'true');
+    // Posición acumulada de la perilla (en pasos de 45°): así gira siempre
+    // hacia adelante con la perilla aunque el canal dé la vuelta al final.
+    let knob = current;
+
+    const select = (i: number, turn = i - current) => {
+      current = i;
+      knob += turn;
       carts.forEach((c, k) => {
         c.setAttribute('aria-pressed', String(k === i));
         c.tabIndex = k === i ? 0 : -1;
@@ -939,7 +1004,7 @@ const antenna = [
       panels.forEach((p, k) => p.toggleAttribute('data-active', k === i));
 
       // Cada cartucho es un canal: la perilla gira y el display lo muestra.
-      tv.style.setProperty('--ch', String(i));
+      tv.style.setProperty('--ch', String(knob));
       if (ch) ch.textContent = `CH${String(i + 1).padStart(2, '0')}`;
 
       if (!reducedMotion.matches) {
@@ -959,6 +1024,18 @@ const antenna = [
     };
 
     carts.forEach((c, i) => c.addEventListener('click', () => select(i)));
+
+    // Perilla CH: siguiente cartucho visible según el filtro, con vuelta al
+    // principio al llegar al último.
+    nextCh?.addEventListener('click', () => {
+      for (let k = 1; k <= carts.length; k++) {
+        const j = (current + k) % carts.length;
+        if (!carts[j].classList.contains('dim')) {
+          select(j, 1);
+          return;
+        }
+      }
+    });
 
     // Flechas: mueven el foco por el grid (roving tabindex). Enter/Espacio
     // seleccionan porque cada cartucho es un <button>.

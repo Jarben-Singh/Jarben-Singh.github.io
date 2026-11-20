@@ -1,6 +1,6 @@
 export type Lang = 'en' | 'es';
 export type Localized<T> = Record<Lang, T>;
-export type Platform = 'WEB' | 'MOBILE' | 'GAME' | 'HARDWARE';
+export type Platform = 'WEB' | 'MOBILE' | 'GAME';
 
 /** Filtros del estante, en orden. */
 export const platforms: { id: Platform | 'ALL'; label: Localized<string> }[] = [
@@ -8,7 +8,6 @@ export const platforms: { id: Platform | 'ALL'; label: Localized<string> }[] = [
   { id: 'WEB', label: { en: 'WEB', es: 'WEB' } },
   { id: 'MOBILE', label: { en: 'MOBILE', es: 'MÓVIL' } },
   { id: 'GAME', label: { en: 'GAME', es: 'JUEGO' } },
-  { id: 'HARDWARE', label: { en: 'HARDWARE', es: 'HARDWARE' } },
 ];
 
 export interface Project {
@@ -52,7 +51,7 @@ export const projects: Project[] = [
   },
   {
     title: 'SNES Tetris',
-    platform: 'HARDWARE',
+    platform: 'GAME',
     cartridge: 'img/cartridge-tetris.png',
     features: {
       en: [
