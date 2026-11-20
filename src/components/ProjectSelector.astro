@@ -44,6 +44,23 @@ const initial = Math.max(
   0,
   projects.findIndex((p) => p.title === 'Focus Focus'),
 );
+
+const channel = (i: number) => `CH${String(i + 1).padStart(2, '0')}`;
+
+// Antena de conejo en pixel art (rejilla de 48×20, se muestra a ×3).
+const antenna = [
+  // varilla izquierda: diagonal a 45°
+  ...Array.from({ length: 14 }, (_, k) => ({ x: 22 - k, y: 15 - k, w: 1, h: 1, c: 'rod' })),
+  // varilla derecha: más empinada
+  ...Array.from({ length: 7 }, (_, k) => ({ x: 25 + k, y: 14 - 2 * k, w: 1, h: 2, c: 'rod' })),
+  // puntas
+  { x: 7, y: 0, w: 3, h: 3, c: 'tip' },
+  { x: 31, y: 0, w: 3, h: 3, c: 'tip' },
+  // base
+  { x: 20, y: 16, w: 8, h: 1, c: 'hi' },
+  { x: 18, y: 17, w: 12, h: 2, c: 'mid' },
+  { x: 18, y: 19, w: 12, h: 1, c: 'lo' },
+];
 ---
 
 <section id="project-grid" class="w-full mt-12" aria-labelledby="pg-title">
@@ -128,72 +145,102 @@ const initial = Math.max(
     </div>
 
     <!-- Tele -->
-    <div class="tv" data-tv>
-      <div class="tv-screen" id="pg-screen" data-screen aria-live="polite">
-        {
-          projects.map((p, i) => (
-            <div class="tv-panel" data-panel data-active={i === initial ? '' : undefined}>
-              <div class="tv-hd">
-                <T v={p.locked ? ui.noSignal : ui.nowPlaying} />
-                <span class="rec">● SLOT A</span>
-              </div>
-              <h3 class="tv-title">{p.locked ? p.title.toUpperCase() : p.title}</h3>
-              {p.platform && (
-                <p class="tv-sub">
-                  <T v={platformLabel[p.platform]} />
-                </p>
-              )}
-              {p.locked && (
-                <p class="denied">
-                  <T v={ui.denied} />
-                  <br />
-                  <T v={ui.stage} />
-                </p>
-              )}
-              {(['en', 'es'] as const).map((lang) => (
-                <ul class="stars" data-lang={lang}>
-                  {p.features[lang].map((feature) => (
-                    <li>
-                      <svg viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true">
-                        {starRects.map((r) => (
-                          <rect x={r.x} y={r.y} width={r.w} height="1" fill="currentColor" />
+    <div class="tv" data-tv style={`--ch: ${initial}`}>
+      <svg
+        class="tv-antenna"
+        viewBox="0 0 48 20"
+        shape-rendering="crispEdges"
+        aria-hidden="true"
+      >
+        {antenna.map((r) => <rect x={r.x} y={r.y} width={r.w} height={r.h} class={`a-${r.c}`} />)}
+      </svg>
+      <div class="tv-cabinet">
+        <div class="tv-bezel">
+          <div class="tv-tube">
+            <div class="tv-screen" id="pg-screen" data-screen aria-live="polite">
+              {
+                projects.map((p, i) => (
+                  <div class="tv-panel" data-panel data-active={i === initial ? '' : undefined}>
+                    <div class="tv-hd">
+                      <T v={p.locked ? ui.noSignal : ui.nowPlaying} />
+                      <span class="rec">● SLOT A</span>
+                    </div>
+                    <h3 class="tv-title">{p.locked ? p.title.toUpperCase() : p.title}</h3>
+                    {p.platform && (
+                      <p class="tv-sub">
+                        <T v={platformLabel[p.platform]} />
+                      </p>
+                    )}
+                    {p.locked && (
+                      <p class="denied">
+                        <T v={ui.denied} />
+                        <br />
+                        <T v={ui.stage} />
+                      </p>
+                    )}
+                    {(['en', 'es'] as const).map((lang) => (
+                      <ul class="stars" data-lang={lang}>
+                        {p.features[lang].map((feature) => (
+                          <li>
+                            <svg viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true">
+                              {starRects.map((r) => (
+                                <rect x={r.x} y={r.y} width={r.w} height="1" fill="currentColor" />
+                              ))}
+                            </svg>
+                            <span>{feature}</span>
+                          </li>
                         ))}
-                      </svg>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              ))}
-              {p.stack.length > 0 && (
-                <ul class="chips" aria-label="Stack">
-                  {p.stack.map((s) => (
-                    <li>{s}</li>
-                  ))}
-                </ul>
-              )}
-              <div class="tv-actions">
-                {p.locked ? (
-                  <span class="inline-block px-8 py-2 border-2 border-outline-variant font-pixel text-[10px] text-outline cursor-not-allowed">
-                    <T v={ui.locked} />
-                  </span>
-                ) : (
-                  <a
-                    href={p.href}
-                    class="inline-block px-8 py-2 border-2 border-primary-fixed-dim bg-surface-container-lowest font-pixel text-[10px] text-white hover:bg-primary-container transition-colors"
-                  >
-                    <T v={ui.more} /> ▶
-                  </a>
-                )}
-              </div>
+                      </ul>
+                    ))}
+                    {p.stack.length > 0 && (
+                      <ul class="chips" aria-label="Stack">
+                        {p.stack.map((s) => (
+                          <li>{s}</li>
+                        ))}
+                      </ul>
+                    )}
+                    <div class="tv-actions">
+                      {p.locked ? (
+                        <span class="inline-block px-8 py-2 border-2 border-outline-variant font-pixel text-[10px] text-outline cursor-not-allowed">
+                          <T v={ui.locked} />
+                        </span>
+                      ) : (
+                        <a
+                          href={p.href}
+                          class="inline-block px-8 py-2 border-2 border-primary-fixed-dim bg-surface-container-lowest font-pixel text-[10px] text-white hover:bg-primary-container transition-colors"
+                        >
+                          <T v={ui.more} /> ▶
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))
+              }
             </div>
-          ))
-        }
+          </div>
+        </div>
+        <!-- Panel de controles lateral -->
+        <div class="tv-side" aria-hidden="true">
+          <span class="tv-brand">JD-19</span>
+          <span class="tv-ch" data-ch>{channel(initial)}</span>
+          <span class="knob-wrap">
+            <span class="knob"><span class="knob-cap" data-knob="ch"></span></span>
+            <span class="knob-lbl">CH</span>
+          </span>
+          <span class="knob-wrap">
+            <span class="knob"><span class="knob-cap" data-knob="vol"></span></span>
+            <span class="knob-lbl">VOL</span>
+          </span>
+          <span class="tv-grille"></span>
+          <span class="tv-btns"><span></span><span></span><span></span></span>
+        </div>
+        <div class="tv-base" aria-hidden="true">
+          <span class="led"></span><span>POWER</span><span class="tv-slot"></span><span
+            >PLAYER 1</span
+          >
+        </div>
       </div>
-      <div class="tv-base" aria-hidden="true">
-        <span class="led"></span><span>POWER</span><span class="tv-slot"></span><span
-          >PLAYER 1</span
-        >
-      </div>
+      <div class="tv-feet" aria-hidden="true"></div>
     </div>
   </div>
 </section>
@@ -245,10 +292,10 @@ const initial = Math.max(
 
   /* ---------- layout ---------- */
   /* El estante mide justo lo que ocupan 2 cartuchos a ×2 (588px); la tele
-     se queda con el resto, mínimo 280px. */
+     se queda con el resto, mínimo 340px. */
   .pg-layout {
     display: grid;
-    grid-template-columns: minmax(0, 588px) minmax(280px, 1fr);
+    grid-template-columns: minmax(0, 588px) minmax(340px, 1fr);
     gap: 24px;
     align-items: start;
   }
@@ -443,20 +490,117 @@ const initial = Math.max(
   }
 
   /* ---------- tele ---------- */
+  /* Tele de caja: antena de conejo, gabinete con esquinas escalonadas,
+     marco hundido alrededor del tubo, panel lateral de perillas y bocina,
+     franja inferior y patas. La sombra va en .tv con drop-shadow para que
+     siga la silueta recortada (antena y patas incluidas). */
   .tv {
+    --plastic: var(--color-on-surface-variant);
+    --plastic-hi: var(--color-secondary-fixed);
+    --plastic-lo: var(--color-outline);
+    --plastic-dk: #5a5c70;
+    --bezel: #2c2e40;
+    --bezel-dk: #15161f;
     position: sticky;
     top: 6rem;
-    padding: 14px 14px 0;
-    background: var(--color-on-surface-variant);
-    box-shadow:
-      inset 6px 6px 0 var(--color-secondary-fixed),
-      inset -6px -6px 0 var(--color-outline),
-      8px 8px 0 var(--color-indigo-shadow);
+    container: tv / inline-size;
+    filter: drop-shadow(8px 8px 0 var(--color-indigo-shadow));
   }
+
+  /* Esquinas en escalera de 2 pasos de --s */
+  .tv-cabinet,
+  .tv-bezel,
+  .tv-tube,
+  .knob,
+  .knob-cap {
+    --s2: calc(var(--s) * 2);
+    clip-path: polygon(
+      var(--s2) 0,
+      calc(100% - var(--s2)) 0,
+      calc(100% - var(--s2)) var(--s),
+      calc(100% - var(--s)) var(--s),
+      calc(100% - var(--s)) var(--s2),
+      100% var(--s2),
+      100% calc(100% - var(--s2)),
+      calc(100% - var(--s)) calc(100% - var(--s2)),
+      calc(100% - var(--s)) calc(100% - var(--s)),
+      calc(100% - var(--s2)) calc(100% - var(--s)),
+      calc(100% - var(--s2)) 100%,
+      var(--s2) 100%,
+      var(--s2) calc(100% - var(--s)),
+      var(--s) calc(100% - var(--s)),
+      var(--s) calc(100% - var(--s2)),
+      0 calc(100% - var(--s2)),
+      0 var(--s2),
+      var(--s) var(--s2),
+      var(--s) var(--s),
+      var(--s2) var(--s)
+    );
+  }
+
+  .tv-antenna {
+    display: block;
+    width: 144px;
+    height: 60px;
+    margin: 0 auto;
+  }
+  .a-rod {
+    fill: var(--color-outline);
+  }
+  .a-tip {
+    fill: var(--color-secondary-fixed);
+  }
+  .a-hi {
+    fill: var(--color-secondary-fixed);
+  }
+  .a-mid {
+    fill: var(--color-on-surface-variant);
+  }
+  .a-lo {
+    fill: var(--color-outline);
+  }
+
+  .tv-cabinet {
+    --s: 6px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 84px;
+    gap: 14px;
+    padding: 16px 16px 0;
+    background: var(--plastic);
+    box-shadow:
+      inset 6px 6px 0 var(--plastic-hi),
+      inset -6px -6px 0 var(--plastic-lo);
+  }
+
+  /* Marco hundido alrededor del tubo */
+  .tv-bezel {
+    --s: 4px;
+    padding: 12px;
+    background: var(--bezel);
+    box-shadow:
+      inset 4px 4px 0 var(--bezel-dk),
+      inset -4px -4px 0 var(--plastic-dk);
+  }
+
+  /* El tubo: esquinas redondeadas en escalera, brillo y viñeta de CRT */
+  .tv-tube {
+    --s: 5px;
+    position: relative;
+  }
+  .tv-tube::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 40% at 22% 12%, rgb(255 255 255 / 0.09), transparent 70%),
+      radial-gradient(ellipse at center, transparent 62%, rgb(0 0 0 / 0.5) 100%);
+  }
+
   .tv-screen {
     position: relative;
     display: grid;
-    padding: 20px 20px 22px;
+    padding: 22px 24px 24px;
     background: var(--color-surface-container-lowest);
     box-shadow: inset 0 0 0 4px #000;
     overflow: hidden;
@@ -570,11 +714,154 @@ const initial = Math.max(
     padding-top: 4px;
   }
 
+  /* ---------- panel lateral ---------- */
+  .tv-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 8px 14px;
+    background: var(--plastic-lo);
+    box-shadow:
+      inset 3px 3px 0 var(--plastic-dk),
+      inset -3px -3px 0 var(--plastic-hi);
+  }
+  .tv-brand {
+    padding: 4px 5px 3px;
+    font-family: var(--font-pixel);
+    font-size: 7px;
+    letter-spacing: 0.08em;
+    color: var(--plastic-hi);
+    background: var(--bezel);
+    box-shadow: inset -2px -2px 0 #000;
+  }
+  .tv-ch {
+    min-width: 56px;
+    padding: 6px 4px 5px;
+    font-family: var(--font-pixel);
+    font-size: 9px;
+    text-align: center;
+    color: var(--star);
+    text-shadow: 0 0 4px rgb(255 210 63 / 0.7);
+    background: #000;
+    box-shadow:
+      inset 2px 2px 0 var(--bezel-dk),
+      0 0 0 2px var(--plastic-dk);
+  }
+  .knob-wrap {
+    display: grid;
+    justify-items: center;
+    gap: 5px;
+  }
+  .knob {
+    --s: 4px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    background: var(--bezel);
+  }
+  .knob-cap {
+    --s: 4px;
+    position: relative;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--plastic-hi) 0 50%, var(--plastic) 50%);
+    rotate: calc(var(--ch, 0) * 45deg);
+    transition: rotate 0.2s steps(2);
+  }
+  .knob-cap::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    background: var(--plastic);
+  }
+  .knob-cap::after {
+    content: '';
+    position: absolute;
+    left: calc(50% - 2px);
+    top: 2px;
+    width: 4px;
+    height: 12px;
+    background: var(--bezel);
+  }
+  .knob-cap[data-knob='vol'] {
+    rotate: -60deg;
+  }
+  .knob-lbl {
+    font-family: var(--font-pixel);
+    font-size: 6px;
+    letter-spacing: 0.08em;
+    color: var(--bezel);
+  }
+  .tv-grille {
+    flex: 1;
+    align-self: stretch;
+    min-height: 40px;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--bezel) 0 3px,
+      transparent 3px 7px
+    );
+    box-shadow: 0 0 0 3px var(--plastic-lo), 0 0 0 5px var(--plastic-dk);
+    margin-inline: 5px;
+  }
+  .tv-btns {
+    display: flex;
+    gap: 6px;
+  }
+  .tv-btns span {
+    width: 12px;
+    height: 8px;
+    background: var(--plastic);
+    box-shadow:
+      inset -2px -2px 0 var(--plastic-dk),
+      0 2px 0 #000;
+  }
+
+  /* Tele angosta: los controles pasan a una fila bajo la pantalla */
+  @container tv (max-width: 479px) {
+    .tv-cabinet {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .tv-side {
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 8px 12px;
+    }
+    .tv-brand,
+    .tv-btns,
+    .knob-lbl {
+      display: none;
+    }
+    .knob {
+      width: 32px;
+      height: 32px;
+    }
+    .knob-cap {
+      width: 24px;
+      height: 24px;
+    }
+    .knob-cap::before {
+      inset: 5px;
+    }
+    .knob-cap::after {
+      height: 9px;
+    }
+    .tv-grille {
+      min-height: 28px;
+      min-width: 32px;
+      margin-block: 3px;
+    }
+  }
+
+  /* ---------- franja inferior y patas ---------- */
   .tv-base {
+    grid-column: 1 / -1;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 4px 12px;
+    padding: 0 6px 16px;
     font-family: var(--font-pixel);
     font-size: 7px;
     letter-spacing: 0.08em;
@@ -592,9 +879,24 @@ const initial = Math.max(
     background: var(--color-outline);
     box-shadow: inset 0 2px 0 var(--color-outline-variant);
   }
+  .tv-feet {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 32px;
+  }
+  .tv-feet::before,
+  .tv-feet::after {
+    content: '';
+    width: 48px;
+    height: 10px;
+    background: var(--plastic-lo);
+    box-shadow: inset 0 -4px 0 var(--plastic-dk);
+  }
 
   /* ---------- responsive ---------- */
-  @media (max-width: 859px) {
+  /* Debajo de 1024px no caben el estante a ×2 y una tele digna lado a lado:
+     la tele pasa arriba a todo lo ancho. */
+  @media (max-width: 1023px) {
     .pg-layout {
       grid-template-columns: 1fr;
     }
@@ -607,7 +909,8 @@ const initial = Math.max(
   @media (prefers-reduced-motion: reduce) {
     .cart,
     .cart *,
-    .tv-screen {
+    .tv-screen,
+    .knob-cap {
       transition: none !important;
       animation: none !important;
     }
@@ -624,7 +927,8 @@ const initial = Math.max(
     const carts = [...shelf.querySelectorAll<HTMLButtonElement>('[data-cart]')];
     const panels = [...screen.querySelectorAll<HTMLElement>('[data-panel]')];
     const filters = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')];
-    const mobile = matchMedia('(max-width: 859px)');
+    const mobile = matchMedia('(max-width: 1023px)');
+    const ch = tv.querySelector<HTMLElement>('[data-ch]');
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
     const select = (i: number) => {
@@ -633,6 +937,10 @@ const initial = Math.max(
         c.tabIndex = k === i ? 0 : -1;
       });
       panels.forEach((p, k) => p.toggleAttribute('data-active', k === i));
+
+      // Cada cartucho es un canal: la perilla gira y el display lo muestra.
+      tv.style.setProperty('--ch', String(i));
+      if (ch) ch.textContent = `CH${String(i + 1).padStart(2, '0')}`;
 
       if (!reducedMotion.matches) {
         screen.classList.remove('boot');

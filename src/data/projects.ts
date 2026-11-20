@@ -93,7 +93,7 @@ export const projects: Project[] = [
     href: '#',
   },
   {
-    title: 'EDSAGUA / CESPE',
+    title: 'ENSAGUA',
     platform: 'WEB',
     cartridge: 'img/cartridge-ensagua.png',
     features: {
